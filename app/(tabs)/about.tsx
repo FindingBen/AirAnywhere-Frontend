@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ImageBackground } from "react-native";
 import React from "react";
-import aboutImg from "@/assets/images/cikles.jpg";
+import aboutImg from "@/assets/images/bl.jpg";
 const about = () => {
   return (
     <View style={styles.container}>
@@ -9,12 +9,13 @@ const about = () => {
         resizeMode="cover"
         style={styles.image}
       >
-        <Text style={styles.text}>About this app</Text>
+        <Text style={styles.text}>Contact us</Text>
         <Text style={styles.description}>
           This app was created with purpose to help find fellow cyklists around
           Copenhagen a public bike pump. If you have information about possible
           location of public air pump, give us a message!
         </Text>
+        <Text style={styles.contact}>beniagic@gmail.com</Text>
       </ImageBackground>
     </View>
   );
@@ -43,8 +44,15 @@ const styles = StyleSheet.create({
   description: {
     color: "white",
     fontSize: 16,
+    marginHorizontal: 20,
+    fontWeight: "semibold",
+    textAlign: "center",
+  },
+  contact: {
+    color: "white",
+    fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    marginTop: 25,
   },
 });

@@ -8,12 +8,22 @@ import {
   Alert,
 } from "react-native";
 import { Link } from "expo-router";
-import * as Linking from "expo-linking";
-import * as Clipboard from "expo-clipboard";
+import { useAuth } from "../authentication/auth";
 import React from "react";
-import wheelImg from "@/assets/images/copenhagen.jpg";
+import wheelImg from "@/assets/images/bl.jpg";
 
 const index = () => {
+  const { authState, onLogout } = useAuth();
+  console.log(authState);
+  const handleLogout = async () => {
+    try {
+      await onLogout!(); // Call the logout function
+      Alert.alert("Logged Out", "You have been successfully logged out.");
+    } catch (error) {
+      Alert.alert("Error", "An error occurred while logging out.");
+      console.error("Logout error:", error);
+    }
+  };
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -27,6 +37,13 @@ const index = () => {
             <Text style={styles.buttonText}>Go to Map</Text>
           </Pressable>
         </Link>
+        {authState?.authenticated ? (
+          <Pressable style={styles.buttonLogOut} onPress={handleLogout}>
+            <Text style={styles.buttonText}>Logout</Text>
+          </Pressable>
+        ) : (
+          <></>
+        )}
       </ImageBackground>
     </View>
   );
@@ -67,6 +84,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "rgba(0,0,0,0.75)",
     justifyContent: "center",
+  },
+  buttonLogOut: {
+    height: 45,
+    marginTop: 5,
+    borderRadius: 15,
+    backgroundColor: "rgba(29, 76, 116, 1)",
+    justifyContent: "center",
+    marginHorizontal: 10,
   },
   buttonText: {
     color: "white",

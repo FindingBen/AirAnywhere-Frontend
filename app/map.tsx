@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MapView, { Marker, Callout } from "react-native-maps";
 import {
   StyleSheet,
@@ -6,93 +6,67 @@ import {
   Platform,
   Text,
   Button,
+  ActivityIndicator,
   Alert,
   Modal,
   TouchableOpacity,
 } from "react-native";
-import * as Linking from "expo-linking";
-import * as Clipboard from "expo-clipboard";
+import { useFocusEffect } from "@react-navigation/native";
+import { fetch } from "expo/fetch";
+import CustomMarker from "@/components/CustomMarker";
+import PumpModalView from "@/components/PumpModalView";
 
 import markers from "@/constants/Markers";
+import axios from "axios";
 
 type MarkerData = {
+  _id: string;
   name: string;
   status: string;
   latitude: number;
   longitude: number;
+  address: string;
 };
 //55.70841663961272, 12.590810764204106
 export default function App() {
   const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
+  //const [markers, setMarkerData] = useState([]);
 
-  const copyToClipboard = (latitude: number, longitude: number) => {
-    const coordinates = `${latitude}, ${longitude}`;
-    Clipboard.setStringAsync(coordinates);
-    console.log("AAAA");
-    Alert.alert("Copied to Clipboard", `Coordinates: ${coordinates}`);
-  };
+  // useEffect(() => {
+  //   getMarkers();
+  //   return () => {};
+  // }, []);
+  // const getMarkers = async () => {
+  //   try {
+  //     let response = await axios.get("http://192.168.1.105:5000/markers");
+  //     console.log("DD");
 
-  const openInGoogleMaps = (latitude: number, longitude: number) => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    Linking.openURL(url).catch(() =>
-      Alert.alert("Error", "Unable to open Google Maps.")
-    );
-  };
+  //     if (response.status === 200) {
+  //       console.log("DDDDDS");
+  //       setMarkerData(response.data);
+  //     }
+  //   } catch (error) {}
+  // };
 
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} showsUserLocation>
-        {markers.map((marker, index) => (
-          <Marker
-            key={index}
-            coordinate={{
-              latitude: marker.latitude,
-              longitude: marker.longitude,
-            }}
-            onPress={() => setSelectedMarker(marker)}
-          />
-        ))}
+      <MapView style={styles.map} showsUserLocation key={"map-instance"}>
+        {markers?.map((marker, index) => {
+          return (
+            <CustomMarker
+              pumps={marker}
+              key={index}
+              onSelectMarker={setSelectedMarker}
+            />
+          );
+        })}
       </MapView>
+
       {selectedMarker && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={!!selectedMarker}
-          onRequestClose={() => setSelectedMarker(null)}
-        >
-          <View style={styles.modal}>
-            <Text style={styles.title}>{selectedMarker.name}</Text>
-            <Text style={styles.coordinates}>{selectedMarker.status}</Text>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() =>
-                copyToClipboard(
-                  selectedMarker.latitude,
-                  selectedMarker.longitude
-                )
-              }
-            >
-              <Text style={styles.buttonText}>Copy Coordinates</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() =>
-                openInGoogleMaps(
-                  selectedMarker.latitude,
-                  selectedMarker.longitude
-                )
-              }
-            >
-              <Text style={styles.buttonText}>Open in Google Maps</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setSelectedMarker(null)}
-            >
-              <Text style={{ color: "#fff" }}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
+        <PumpModalView
+          pump={selectedMarker}
+          onSelectMarker={setSelectedMarker}
+        />
       )}
     </View>
   );
@@ -145,4 +119,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  // markerView: {
+  //   backgroundColor: "white",
+  //   padding: 3,
+  //   borderWidth: 1,
+  //   borderColor: "gray",
+  //   borderRadius: 25,
+  // },
+  // markerText: {
+  //   fontWeight: "semibold",
+  // },
 });

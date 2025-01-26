@@ -17,6 +17,12 @@ const markers = [
     name: "Nordhavn pump",
     status: "Works",
   },
+  {
+    latitude: 55.62405,
+    longitude: 12.52876,
+    name: "Offentlige pump",
+    status: "Works",
+  },
 ];
 
 export default markers;

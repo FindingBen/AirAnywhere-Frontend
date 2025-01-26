@@ -19,11 +19,13 @@ type MarkerData = {
   status: string;
   latitude: number;
   longitude: number;
+  address: string;
 };
 
 export default function PumpScreen() {
   const colorScheme = useColorScheme();
   const [markers, setMarkers] = useState<MarkerData[]>([]);
+
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
   const styles = createStyles(theme, colorScheme);
@@ -63,7 +65,7 @@ export default function PumpScreen() {
   );
 }
 
-function createStyles(theme, colorScheme) {
+function createStyles(theme: {}, colorScheme: null) {
   return StyleSheet.create({
     contentContainer: {
       flex: 1,

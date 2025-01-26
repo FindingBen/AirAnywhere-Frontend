@@ -1,18 +1,22 @@
 import { Tabs } from "expo-router";
-import React from "react";
-import { Platform } from "react-native";
-import { Stack } from "expo-router";
+import React, { useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { TabBarIcon } from "@/components/icons/TabBarIcon";
 import { useEffect } from "react";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { AuthProvide } from "../authentication/auth";
 import { useFonts } from "expo-font";
+import { useAuth } from "../authentication/auth";
+import { Alert, TouchableOpacity } from "react-native";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { authState, onLogout } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loaded] = useFonts({
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -27,11 +31,12 @@ export default function RootLayout() {
     return null;
   }
 
+  console.log(authState);
+
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-
         headerShown: false,
       }}
     >
@@ -51,22 +56,31 @@ export default function RootLayout() {
       <Tabs.Screen
         name="about"
         options={{
-          title: "About",
+          title: "Contact",
           tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons
-              name="map-marker-question-outline"
-              size={24}
-              color={color}
-            />
+            <AntDesign name="message1" size={24} color={color} />
           ),
         }}
       />
+
       <Tabs.Screen
         name="addPump"
+        redirect={!authState?.authenticated}
         options={{
           title: "Add pump",
           tabBarIcon: ({ color, focused }) => (
-            <MaterialIcons name="add-location" size={24} color={color} />
+            <FontAwesome6 name="add" size={24} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="login"
+        redirect={authState?.authenticated}
+        options={{
+          title: "Sign in",
+          tabBarIcon: ({ color, focused }) => (
+            <FontAwesome name="sign-in" size={24} color={color} />
           ),
         }}
       />
