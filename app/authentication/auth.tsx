@@ -50,10 +50,9 @@ export const AuthProvide = ({ children }: any) => {
       });
       return { success: true, data: response.data };
     } catch (e) {
-      console.error("Registration error:", e);
-      return {
+       return {
         error: true,
-        msg: (e as any).response?.data?.error || "Registration failed.",
+        msg: (e as any).response?.data || "Registration failed.",
       };
     }
   };
@@ -75,10 +74,10 @@ export const AuthProvide = ({ children }: any) => {
       ] = `Bearer ${response.data.token}`;
 
       await SecureStore.setItemAsync(TOKEN_KEY, response.data.token);
-
+      console.log(response);
       return response;
     } catch (e) {
-      return { error: true, msg: (e as any).response.data.msg };
+      return { error: true, msg: (e as any).response.data };
     }
   };
 

@@ -82,7 +82,9 @@ const styles = StyleSheet.create({
   button: {
     height: 45,
     borderRadius: 10,
-    backgroundColor: "rgba(0,0,0,0.75)",
+    borderColor: "white",
+    borderWidth: 1,
+    backgroundColor: "rgba(4, 118, 208, 0.8)",
     justifyContent: "center",
   },
   buttonLogOut: {
@@ -96,7 +98,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "semibold",
     textAlign: "center",
     padding: 4,
   },

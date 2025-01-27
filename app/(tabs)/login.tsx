@@ -28,18 +28,15 @@ const login = () => {
 
     console.log("AA", response);
     if (response && response.error) {
-      Alert.alert(response.msg);
+      Alert.alert(response.msg["error"]);
     }
   };
 
   const register = async () => {
-    console.log("s", email, password);
     const response = await onRegister!(email, password);
     console.log("DASD", response);
     if (response && response.error) {
-      Alert.alert(response.msg);
-    } else {
-      login();
+      Alert.alert(response.msg["error"]);
     }
   };
   return (

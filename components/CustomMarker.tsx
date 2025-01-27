@@ -1,6 +1,5 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import React from "react";
-import wheel from "@/assets/images/wheel.jpg";
 import { Marker } from "react-native-maps";
 
 const CustomMarker = ({ pumps, onSelectMarker }) => {
@@ -16,7 +15,10 @@ const CustomMarker = ({ pumps, onSelectMarker }) => {
       onPress={() => onSelectMarker(pumps)}
     >
       <View style={styles.markerView}>
-        <Text style={styles.markerText}>{pumps?.name}</Text>
+        <Image
+          source={require("@/assets/images/room.png")}
+          style={styles.markerText}
+        ></Image>
       </View>
     </Marker>
   );
@@ -33,6 +35,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   markerText: {
-    fontWeight: "semibold",
+    height: 25,
+    width: 25,
   },
 });

@@ -1,21 +1,11 @@
 import React, { useEffect, useState } from "react";
-import MapView, { Marker, Callout } from "react-native-maps";
-import {
-  StyleSheet,
-  View,
-  Platform,
-  Text,
-  Button,
-  ActivityIndicator,
-  Alert,
-  Modal,
-  TouchableOpacity,
-} from "react-native";
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { fetch } from "expo/fetch";
 import CustomMarker from "@/components/CustomMarker";
 import PumpModalView from "@/components/PumpModalView";
-
+import wheelIcon from "@/assets/images/pump.jpg";
 import markers from "@/constants/Markers";
 import axios from "axios";
 
@@ -47,10 +37,23 @@ export default function App() {
   //     }
   //   } catch (error) {}
   // };
-
+  console.log(PROVIDER_GOOGLE);
   return (
     <View style={styles.container}>
-      <MapView style={styles.map} showsUserLocation key={"map-instance"}>
+      <MapView
+        style={styles.map}
+        showsUserLocation
+        mapType="standard"
+        loadingEnabled={true}
+        key={"map-instance"}
+        initialRegion={{
+          latitude: 55.6761,
+          longitude: 12.5683,
+          latitudeDelta: 0.2722,
+          longitudeDelta: 0.1221,
+        }}
+        //provider={PROVIDER_GOOGLE}
+      >
         {markers?.map((marker, index) => {
           return (
             <CustomMarker
