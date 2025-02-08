@@ -23,6 +23,12 @@ const markers = [
     name: "Offentlige pump",
     status: "Works",
   },
+  {
+    latitude: 55.65879,
+    longitude: 12.60688,
+    name: "Lidl amager pump",
+    status: "Works",
+  },
 ];
 
 export default markers;

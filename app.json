@@ -4,41 +4,56 @@
     "slug": "findpump-cukel",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/wheel.png",
+    "icon": "./assets/images/canva_wheel.png",
     "scheme": "myapp",
-    "platforms": ["ios", "android"],
-    
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+
     "ios": {
       "bundleIdentifier": "com.erforas.myapp",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/canva_wheel.png",
         "backgroundColor": "#000000"
-      }
+      },
+      "package": "com.erforas.myapp"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/canva_wheel.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/search.jpg",
+          "image": "./assets/images/canva_wheel.png",
           "imageWidth": 200,
           "resizeMode": "cover",
           "backgroundColor": "#000000"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "bbcc0036-01e7-457c-83bf-5747e3ada2e1"
+      }
     }
   }
 }
