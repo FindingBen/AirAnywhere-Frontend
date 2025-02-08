@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useAuth } from "../authentication/auth";
+import { useAuth } from "./authentication/auth";
 import { LinearGradient } from "expo-linear-gradient";
 import { TextInput } from "react-native-gesture-handler";
 import wheel from "@/assets/images/wheel.jpg";

@@ -63,7 +63,7 @@ export default function RootLayout() {
         }}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="addPump"
         redirect={!authState?.authenticated}
         options={{
@@ -83,7 +83,7 @@ export default function RootLayout() {
             <FontAwesome name="sign-in" size={24} color={color} />
           ),
         }}
-      />
+      /> */}
 
       <Tabs.Screen name="+not-found" />
     </Tabs>

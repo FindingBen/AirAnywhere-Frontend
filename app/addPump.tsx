@@ -18,7 +18,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/Colors";
 import img from "@/assets/images/bl.jpg";
 import { useRouter } from "expo-router";
-import { useAuth } from "../authentication/auth";
+import { useAuth } from "./authentication/auth";
 import { useColorScheme } from "@/hooks/useColorScheme.web";
 import axios from "axios";
 
