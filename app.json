@@ -12,7 +12,6 @@
       "web"
     ],
     "userInterfaceStyle": "automatic",
-
     "ios": {
       "bundleIdentifier": "com.erforas.myapp",
       "supportsTablet": true,
