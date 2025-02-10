@@ -8,7 +8,8 @@
     "scheme": "myapp",
     "platforms": [
       "ios",
-      "android"
+      "android",
+      "web"
     ],
     "userInterfaceStyle": "automatic",
 

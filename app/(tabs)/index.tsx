@@ -1,105 +1,135 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  Pressable,
-  Button,
-  Alert,
-} from "react-native";
-import { Link } from "expo-router";
-import { useAuth } from "../authentication/auth";
-import React from "react";
-import wheelImg from "@/assets/images/bl.jpg";
+import React, { useEffect, useState } from "react";
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { fetch } from "expo/fetch";
+import CustomMarker from "@/components/CustomMarker";
+import PumpModalView from "@/components/PumpModalView";
+import wheelIcon from "@/assets/images/pump.jpg";
+import markers from "@/constants/Markers";
+import axios from "axios";
 
-const index = () => {
-  const { authState, onLogout } = useAuth();
-  console.log(authState);
-  const handleLogout = async () => {
-    try {
-      await onLogout!(); // Call the logout function
-      Alert.alert("Logged Out", "You have been successfully logged out.");
-    } catch (error) {
-      Alert.alert("Error", "An error occurred while logging out.");
-      console.error("Logout error:", error);
-    }
-  };
+type MarkerData = {
+  _id: string;
+  name: string;
+  status: string;
+  latitude: number;
+  longitude: number;
+  address: string;
+};
+//55.70841663961272, 12.590810764204106
+export default function App() {
+  const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
+  //const [markers, setMarkerData] = useState([]);
+
+  // useEffect(() => {
+  //   getMarkers();
+  //   return () => {};
+  // }, []);
+  // const getMarkers = async () => {
+  //   try {
+  //     let response = await axios.get("http://192.168.1.105:5000/markers");
+  //     console.log("DD");
+
+  //     if (response.status === 200) {
+  //       console.log("DDDDDS");
+  //       setMarkerData(response.data);
+  //     }
+  //   } catch (error) {}
+  // };
+  console.log(PROVIDER_GOOGLE);
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={wheelImg}
-        resizeMode="cover"
-        style={styles.image}
+      <MapView
+        style={styles.map}
+        showsUserLocation
+        mapType="standard"
+        loadingEnabled={true}
+        key={"map-instance"}
+        initialRegion={{
+          latitude: 55.6761,
+          longitude: 12.5683,
+          latitudeDelta: 0.2722,
+          longitudeDelta: 0.1221,
+        }}
+        //provider={PROVIDER_GOOGLE}
       >
-        <Text style={styles.text}>Find me some air</Text>
-        <Link style={{ marginHorizontal: "auto" }} href="/map" asChild>
-          <Pressable style={styles.button}>
-            <Text style={styles.buttonText}>Go to Map</Text>
-          </Pressable>
-        </Link>
-        {authState?.authenticated ? (
-          <Pressable style={styles.buttonLogOut} onPress={handleLogout}>
-            <Text style={styles.buttonText}>Logout</Text>
-          </Pressable>
-        ) : (
-          <></>
-        )}
-      </ImageBackground>
+        {markers?.map((marker, index) => {
+          return (
+            <CustomMarker
+              pumps={marker}
+              key={index}
+              onSelectMarker={setSelectedMarker}
+            />
+          );
+        })}
+      </MapView>
+
+      {selectedMarker && (
+        <PumpModalView
+          pump={selectedMarker}
+          onSelectMarker={setSelectedMarker}
+        />
+      )}
     </View>
   );
-};
-
-export default index;
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "row",
   },
-  image: {
+  map: {
     width: "100%",
     height: "100%",
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
   },
-  text: {
-    color: "white",
-    fontSize: 42,
+  modal: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    padding: 20,
+  },
+  title: {
+    fontSize: 20,
     fontWeight: "bold",
-    textAlign: "center",
+    color: "white",
+    marginBottom: 10,
+  },
+  coordinates: {
+    fontSize: 16,
+    color: "white",
     marginBottom: 20,
   },
-  link: {
-    color: "white",
-    fontSize: 42,
-    fontWeight: "bold",
-    textAlign: "center",
-    textDecorationLine: "underline",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    padding: 4,
-  },
   button: {
-    height: 45,
-    borderRadius: 10,
-    borderColor: "white",
-    borderWidth: 1,
-    backgroundColor: "rgba(4, 118, 208, 0.8)",
-    justifyContent: "center",
+    backgroundColor: "#007BFF",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
   },
-  buttonLogOut: {
-    height: 45,
-    marginTop: 5,
-    borderRadius: 15,
-    backgroundColor: "rgba(29, 76, 116, 1)",
-    justifyContent: "center",
-    marginHorizontal: 10,
+  closeButton: {
+    backgroundColor: "#FF0000",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "semibold",
-    textAlign: "center",
-    padding: 4,
+    fontSize: 14,
   },
+  webFallback: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  // markerView: {
+  //   backgroundColor: "white",
+  //   padding: 3,
+  //   borderWidth: 1,
+  //   borderColor: "gray",
+  //   borderRadius: 25,
+  // },
+  // markerText: {
+  //   fontWeight: "semibold",
+  // },
 });
