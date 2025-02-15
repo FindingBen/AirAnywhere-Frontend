@@ -3,7 +3,7 @@ import React from "react";
 import { Platform } from "react-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-
+import { MarkersProvider } from "./context/markersContext";
 import { useEffect } from "react";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { AuthProvide } from "./authentication/auth";
@@ -32,14 +32,18 @@ export default function RootLayout() {
 
   return (
     <AuthProvide>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen
-            name="(tabs)"
-            options={{ headerShown: false, title: "Home" }}
-          ></Stack.Screen>
-        </Stack>
-      </ThemeProvider>
+      <MarkersProvider>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <Stack>
+            <Stack.Screen
+              name="(tabs)"
+              options={{ headerShown: false, title: "Home" }}
+            ></Stack.Screen>
+          </Stack>
+        </ThemeProvider>
+      </MarkersProvider>
     </AuthProvide>
   );
 }

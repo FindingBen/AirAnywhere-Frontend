@@ -3,7 +3,6 @@ import React from "react";
 import { Marker } from "react-native-maps";
 
 const CustomMarker = ({ pumps, onSelectMarker }) => {
-  console.log("SDDDA", pumps.latitude);
   return (
     <Marker
       key={pumps?._id}

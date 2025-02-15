@@ -12,7 +12,7 @@ const about = () => {
         <Text style={styles.text}>Contact us</Text>
         <Text style={styles.description}>
           This app was created with purpose to help find fellow cyklists around
-          Copenhagen a public bike pump. If you have information about possible
+          Copenhagen find a public bike pump. If you have information about possible
           location of public air pump, give us a message!
         </Text>
         <Text style={styles.contact}>beniagic@gmail.com</Text>

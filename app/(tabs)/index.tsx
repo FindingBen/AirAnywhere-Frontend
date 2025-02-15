@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
-import { fetch } from "expo/fetch";
+import MapView from "react-native-maps";
+import { StyleSheet, View, ActivityIndicator } from "react-native";
+
 import CustomMarker from "@/components/CustomMarker";
 import PumpModalView from "@/components/PumpModalView";
-import wheelIcon from "@/assets/images/pump.jpg";
-import markers from "@/constants/Markers";
-import axios from "axios";
+import { useMarkers } from "../context/markersContext";
 
 type MarkerData = {
   _id: string;
@@ -20,50 +17,39 @@ type MarkerData = {
 //55.70841663961272, 12.590810764204106
 export default function App() {
   const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
-  //const [markers, setMarkerData] = useState([]);
-
-  // useEffect(() => {
-  //   getMarkers();
-  //   return () => {};
-  // }, []);
-  // const getMarkers = async () => {
-  //   try {
-  //     let response = await axios.get("http://192.168.1.105:5000/markers");
-  //     console.log("DD");
-
-  //     if (response.status === 200) {
-  //       console.log("DDDDDS");
-  //       setMarkerData(response.data);
-  //     }
-  //   } catch (error) {}
-  // };
-  console.log(PROVIDER_GOOGLE);
+  const { markers, isLoading } = useMarkers(); // Get markers from context
   return (
     <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        showsUserLocation
-        mapType="standard"
-        loadingEnabled={true}
-        key={"map-instance"}
-        initialRegion={{
-          latitude: 55.6761,
-          longitude: 12.5683,
-          latitudeDelta: 0.2722,
-          longitudeDelta: 0.1221,
-        }}
-        //provider={PROVIDER_GOOGLE}
-      >
-        {markers?.map((marker, index) => {
-          return (
-            <CustomMarker
-              pumps={marker}
-              key={index}
-              onSelectMarker={setSelectedMarker}
-            />
-          );
-        })}
-      </MapView>
+      {isLoading ? (
+        <View>
+          <ActivityIndicator size="large" color="#007BFF" />
+        </View>
+      ) : (
+        <MapView
+          style={styles.map}
+          showsUserLocation
+          mapType="standard"
+          loadingEnabled={true}
+          key={"map-instance"}
+          initialRegion={{
+            latitude: 55.6761,
+            longitude: 12.5683,
+            latitudeDelta: 0.2722,
+            longitudeDelta: 0.1221,
+          }}
+          //provider={PROVIDER_GOOGLE}
+        >
+          {markers?.map((marker, index) => {
+            return (
+              <CustomMarker
+                pumps={marker}
+                key={index}
+                onSelectMarker={setSelectedMarker}
+              />
+            );
+          })}
+        </MapView>
+      )}
 
       {selectedMarker && (
         <PumpModalView
@@ -82,6 +68,12 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: "100%",
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
   },
   modal: {
     flex: 1,

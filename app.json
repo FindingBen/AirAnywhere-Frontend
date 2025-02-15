@@ -11,6 +11,7 @@
       "android",
       "web"
     ],
+    
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.erforas.myapp",
@@ -43,6 +44,8 @@
         }
       ],
       "expo-secure-store"
+      
+      
     ],
     "experiments": {
       "typedRoutes": true
