@@ -6,6 +6,14 @@ import CustomMarker from "@/components/CustomMarker";
 import PumpModalView from "@/components/PumpModalView";
 import { useMarkers } from "../context/markersContext";
 
+import mobileAds from "react-native-google-mobile-ads";
+import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
+
+// ✅ Your Ad Unit ID (replace TestIds.BANNER when building for production)
+const adUnitId = __DEV__
+  ? TestIds.BANNER
+  : "ca-app-pub-8405702460762102/8057821207";
+
 type MarkerData = {
   _id: string;
   name: string;
@@ -14,10 +22,18 @@ type MarkerData = {
   longitude: number;
   address: string;
 };
-//55.70841663961272, 12.590810764204106
+
 export default function App() {
   const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
   const { markers, isLoading } = useMarkers(); // Get markers from context
+
+  // ✅ Initialize AdMob once
+  useEffect(() => {
+    mobileAds()
+      .initialize()
+      .then(() => console.log("✅ AdMob initialized"));
+  }, []);
+
   return (
     <View style={styles.container}>
       {isLoading ? (
@@ -37,17 +53,14 @@ export default function App() {
             latitudeDelta: 0.2722,
             longitudeDelta: 0.1221,
           }}
-          //provider={PROVIDER_GOOGLE}
         >
-          {markers?.map((marker, index) => {
-            return (
-              <CustomMarker
-                pumps={marker}
-                key={index}
-                onSelectMarker={setSelectedMarker}
-              />
-            );
-          })}
+          {markers?.map((marker, index) => (
+            <CustomMarker
+              pumps={marker}
+              key={index}
+              onSelectMarker={setSelectedMarker}
+            />
+          ))}
         </MapView>
       )}
 
@@ -57,6 +70,18 @@ export default function App() {
           onSelectMarker={setSelectedMarker}
         />
       )}
+
+      {/* ✅ Banner Ad Section */}
+      <View style={styles.bannerContainer}>
+        <BannerAd
+          unitId={adUnitId}
+          size={BannerAdSize.BANNER}
+          onAdLoaded={() => console.log("✅ Banner ad loaded")}
+          onAdFailedToLoad={(error) =>
+            console.log("❌ Banner ad failed:", error)
+          }
+        />
+      </View>
     </View>
   );
 }
@@ -75,53 +100,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#ffffff",
   },
-  modal: {
-    flex: 1,
-    justifyContent: "center",
+  bannerContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    padding: 20,
+    backgroundColor: "#fff",
+    paddingVertical: 4,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 10,
-  },
-  coordinates: {
-    fontSize: 16,
-    color: "white",
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  closeButton: {
-    backgroundColor: "#FF0000",
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 14,
-  },
-  webFallback: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  // markerView: {
-  //   backgroundColor: "white",
-  //   padding: 3,
-  //   borderWidth: 1,
-  //   borderColor: "gray",
-  //   borderRadius: 25,
-  // },
-  // markerText: {
-  //   fontWeight: "semibold",
-  // },
 });
