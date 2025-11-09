@@ -100,14 +100,6 @@ export default function RootLayout() {
 
       <Tabs.Screen name="+not-found" />
     </Tabs>
-    <BannerAd
-              unitId={adUnitId}
-              size={BannerAdSize.BANNER}
-              onAdLoaded={() => console.log("✅ Banner ad loaded")}
-              onAdFailedToLoad={(error) =>
-                console.log("❌ Banner ad failed:", error)
-              }
-            />
             </>
   );
 }
