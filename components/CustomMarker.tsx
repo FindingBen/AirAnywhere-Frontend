@@ -29,9 +29,14 @@ const styles = StyleSheet.create({
   markerView: {
     backgroundColor: "white",
     padding: 3,
-    borderWidth: 1,
-    borderColor: "gray",
+    borderWidth: 2,
+    borderColor: "#626F47",
     borderRadius: 25,
+    shadowColor: "#626F47",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   markerText: {
     height: 25,

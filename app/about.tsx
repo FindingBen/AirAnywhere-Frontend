@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from "react-native";
 import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 
 const about = () => {
-
+  const router = useRouter();
 
   return (
     <LinearGradient
@@ -13,6 +14,13 @@ const about = () => {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+
         <View style={styles.header}>
           <Text style={styles.title}>About Erforus</Text>
         </View>
@@ -37,13 +45,6 @@ const about = () => {
           <Text style={styles.contactLabel}>Contact Us</Text>
           <Text style={styles.contactEmail}>beniagic@gmail.com</Text>
         </View>
-
-        {/* <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity> */}
       </ScrollView>
     </LinearGradient>
   );
@@ -58,6 +59,17 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingVertical: 24,
+  },
+  backButton: {
+    alignSelf: "flex-start",
+    top:20,
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#626F47",
   },
   header: {
     marginBottom: 32,
@@ -108,19 +120,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#FFCF50",
-  },
-  logoutButton: {
-    backgroundColor: "transparent",
-    borderWidth: 2,
-    borderColor: "#626F47",
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  logoutButtonText: {
-    color: "#626F47",
-    fontSize: 16,
-    fontWeight: "700",
   },
 });

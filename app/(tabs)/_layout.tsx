@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { TabBarIcon } from "@/components/icons/TabBarIcon";
 import { useEffect } from "react";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -31,9 +32,12 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-      
     }
   }, [loaded]);
+
+  useEffect(() => {
+    console.log("[TABS] Auth state updated:", authState?.authenticated);
+  }, [authState?.authenticated]);
 
 
     useEffect(() => {
@@ -66,19 +70,18 @@ export default function RootLayout() {
         }}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="about"
         options={{
           title: "Contact",
           tabBarIcon: ({ color, focused }) => (
-            <AntDesign name="message1" size={24} color={color} />
+            <AntDesign name="message" size={24} color={color} />
           ),
         }}
-      />
+      /> */}
 
-      {/* <Tabs.Screen
+      <Tabs.Screen
         name="addPump"
-        redirect={!authState?.authenticated}
         options={{
           title: "Add pump",
           tabBarIcon: ({ color, focused }) => (
@@ -86,17 +89,6 @@ export default function RootLayout() {
           ),
         }}
       />
-
-      <Tabs.Screen
-        name="login"
-        redirect={authState?.authenticated}
-        options={{
-          title: "Sign in",
-          tabBarIcon: ({ color, focused }) => (
-            <FontAwesome name="sign-in" size={24} color={color} />
-          ),
-        }}
-      /> */}
 
       <Tabs.Screen name="+not-found" />
     </Tabs>

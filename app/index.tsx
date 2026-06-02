@@ -4,13 +4,12 @@ import { StyleSheet, View, ActivityIndicator } from "react-native";
 
 import CustomMarker from "@/components/CustomMarker";
 import PumpModalView from "@/components/PumpModalView";
-import AccountDropdown from "@/components/AccountDropdown";
-import { useMarkers } from "../context/markersContext";
+import RightNavigation from "@/components/RightNavigation";
+import { useMarkers } from "./context/markersContext";
 
 import mobileAds from "react-native-google-mobile-ads";
 import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
 
-// ✅ Your Ad Unit ID (replace TestIds.BANNER when building for production)
 const adUnitId = __DEV__
   ? TestIds.BANNER
   : "ca-app-pub-8405702460762102/8057821207";
@@ -24,11 +23,10 @@ type MarkerData = {
   address: string;
 };
 
-export default function App() {
+export default function HomeScreen() {
   const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
-  const { markers, isLoading } = useMarkers(); // Get markers from context
+  const { markers, isLoading } = useMarkers();
 
-  // ✅ Initialize AdMob once
   useEffect(() => {
     mobileAds()
       .initialize()
@@ -37,11 +35,9 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <AccountDropdown />
-      </View>
+      <RightNavigation />
       {isLoading ? (
-        <View>
+        <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#007BFF" />
         </View>
       ) : (
@@ -75,7 +71,6 @@ export default function App() {
         />
       )}
 
-      {/* ✅ Banner Ad Section */}
       <View style={styles.bannerContainer}>
         <BannerAd
           unitId={adUnitId}
@@ -93,12 +88,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  headerContainer: {
-    position: "absolute",
-    top: 50,
-    right: 16,
-    zIndex: 100,
   },
   map: {
     width: "100%",
