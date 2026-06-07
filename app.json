@@ -2,9 +2,13 @@
   "expo": {
     "name": "Erforus",
     "slug": "findpump-cukel",
+<<<<<<< HEAD
     "version": "1.0.6",
+=======
+    "version": "1.0.7",
+>>>>>>> cd40dc4ee0ef813e5d0d3e15bbd2aa84e1802a92
     "orientation": "portrait",
-    "icon": "./assets/images/canva_wheel.png",
+    "icon": "./assets/images/icon_wheel_bg.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -16,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/canva_wheel.png",
+        "foregroundImage": "./assets/images/icon_wheel_bg.png",
         "backgroundColor": "#000000"
       },
       "package": "com.erforas.myapp"
@@ -26,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/canva_wheel.png",
+          "image": "./assets/images/icon_wheel_bg.png",
           "imageWidth": 200,
           "resizeMode": "cover",
           "backgroundColor": "#000000"
