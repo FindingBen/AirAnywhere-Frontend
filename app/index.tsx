@@ -32,7 +32,7 @@ export default function HomeScreen() {
       .initialize()
       .then(() => console.log("✅ AdMob initialized"));
   }, []);
-
+console.log(markers)
   return (
     <View style={styles.container}>
       <RightNavigation />
@@ -75,7 +75,7 @@ export default function HomeScreen() {
         <BannerAd
           unitId={adUnitId}
           size={BannerAdSize.BANNER}
-          onAdLoaded={() => console.log("✅ Banner ad loaded")}
+          onAdLoaded={() => console.log("✅ Banner ad loaded",process.env.EXPO_PUBLIC_API_URL)}
           onAdFailedToLoad={(error) =>
             console.log("❌ Banner ad failed:", error)
           }
