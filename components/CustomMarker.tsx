@@ -3,13 +3,20 @@ import React from "react";
 import { Marker } from "react-native-maps";
 
 const CustomMarker = ({ pumps, onSelectMarker }) => {
+  const latitude = Number(pumps?.latitude);
+  const longitude = Number(pumps?.longitude);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
   return (
     <Marker
       key={pumps?._id}
       //tracksViewChanges={false}
       coordinate={{
-        latitude: pumps?.latitude,
-        longitude: pumps?.longitude,
+        latitude,
+        longitude,
       }}
       onPress={() => onSelectMarker(pumps)}
     >

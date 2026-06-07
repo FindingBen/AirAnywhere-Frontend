@@ -10,6 +10,11 @@ type MarkerData = {
   longitude: number;
 };
 
+type ApiMarkerData = Omit<MarkerData, "latitude" | "longitude"> & {
+  latitude: number | string;
+  longitude: number | string;
+};
+
 type MarkersContextType = {
   markers: MarkerData[];
   fetchMarkers: () => Promise<void>;
@@ -28,6 +33,21 @@ export const MarkersProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchMarkers();
   }, []);
 
+  const normalizeMarker = (marker: ApiMarkerData): MarkerData | null => {
+    const latitude = Number(marker.latitude);
+    const longitude = Number(marker.longitude);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return null;
+    }
+
+    return {
+      ...marker,
+      latitude,
+      longitude,
+    };
+  };
+
   const fetchMarkers = async () => {
     setIsLoading(true);
     try {
@@ -35,7 +55,11 @@ export const MarkersProvider: React.FC<{ children: React.ReactNode }> = ({
         `${process.env.EXPO_PUBLIC_API_URL}markers`
       );
       if (response.status === 200) {
-        setMarkers(response.data);
+        const normalizedMarkers = (response.data as ApiMarkerData[])
+          .map(normalizeMarker)
+          .filter((marker): marker is MarkerData => marker !== null);
+
+        setMarkers(normalizedMarkers);
       }
     } catch (error) {
       console.error("Error fetching markers:", error);
