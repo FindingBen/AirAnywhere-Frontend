@@ -19,7 +19,8 @@
         "foregroundImage": "./assets/images/canva_wheel.png",
         "backgroundColor": "#000000"
       },
-      "package": "com.erforas.myapp"
+    "config":{"googleMaps":{"apiKey":"AIzaSyCiGpNV32MhgBjf8_BijEFojLpKyUQkS9k"},
+      "package": "com.erforas.myapp"}
     },
     "plugins": [
       "expo-router",
