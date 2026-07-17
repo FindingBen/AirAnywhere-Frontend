@@ -13,13 +13,6 @@ import { AuthProvide } from "../authentication/auth";
 import { useFonts } from "expo-font";
 import { useAuth } from "../authentication/auth";
 import { Alert, TouchableOpacity } from "react-native";
-import mobileAds from "react-native-google-mobile-ads";
-import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
-
-
-const adUnitId = __DEV__
-  ? TestIds.BANNER
-  : "ca-app-pub-8405702460762102/5022833445";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

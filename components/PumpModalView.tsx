@@ -61,7 +61,7 @@ const PumpModalView = ({ pump, onSelectMarker }) => {
       console.log("Sending vote:", voteData);
 
       const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_API_URL}vote`,
+        `${process.env.EXPO_PUBLIC_API_URL}/vote`,
         voteData
       );
 

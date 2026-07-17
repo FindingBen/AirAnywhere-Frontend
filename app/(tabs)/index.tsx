@@ -7,14 +7,6 @@ import PumpModalView from "@/components/PumpModalView";
 import AccountDropdown from "@/components/AccountDropdown";
 import { useMarkers } from "../context/markersContext";
 
-import mobileAds from "react-native-google-mobile-ads";
-import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
-
-// ✅ Your Ad Unit ID (replace TestIds.BANNER when building for production)
-const adUnitId = __DEV__
-  ? TestIds.BANNER
-  : "ca-app-pub-8405702460762102/8057821207";
-
 type MarkerData = {
   _id: string;
   name: string;

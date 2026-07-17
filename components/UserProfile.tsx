@@ -43,7 +43,19 @@ const UserProfile = () => {
     return user.username.slice(0, 2).toUpperCase();
   }, [user?.username]);
 
-  if (!user) return null;
+  if (!user) {
+    // Show placeholder while loading
+    return (
+      <View style={styles.container}>
+        <View style={[styles.avatar, { backgroundColor: "#007BFF" }]}>
+          <Text style={styles.initials}>?</Text>
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={styles.username}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

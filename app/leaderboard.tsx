@@ -23,7 +23,7 @@ const leaderboard = () => {
   const fetchLeaderboard = async () => {
     try {
       setIsLoading(true);
-      const url = `${process.env.EXPO_PUBLIC_API_URL}users`;
+      const url = `${process.env.EXPO_PUBLIC_API_URL}/users`;
       console.log("Fetching leaderboard from:", url);
       
       const response = await axios.get(url);

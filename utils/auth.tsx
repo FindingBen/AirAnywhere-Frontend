@@ -42,7 +42,6 @@ export const AuthProvide = ({ children }: any) => {
         console.log("[AUTH] Token found:", !!token);
 
         if (token) {
-          console.log("[AUTH] Token exists, attempting to fetch user from /me");
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           // Fetch user info for registered user
           try {
@@ -50,64 +49,23 @@ export const AuthProvide = ({ children }: any) => {
             setUser({
               userId: userResponse.data.userId,
               username: userResponse.data.username,
-              isAnonymous: userResponse.data.isAnonymous || false,
+              isAnonymous: false,
             });
             console.log("[AUTH] Registered user loaded:", userResponse.data.username);
           } catch (err) {
-            console.error("[AUTH] Failed to fetch user info from /me:", err);
-            console.log("[AUTH] Token was:", token.substring(0, 20) + "...");
-            console.log("[AUTH] API URL:", API_URL);
-            // Token exists but user not found - clear it and create anonymous user instead
-            await SecureStore.deleteItemAsync(TOKEN_KEY);
-            console.log("[AUTH] Clearing invalid token, creating anonymous user instead");
-            
-            // Now create anonymous user
-            let installId = await SecureStore.getItemAsync(INSTALL_ID_KEY);
-            if (!installId) {
-              installId = `device-${Date.now()}`;
-              await SecureStore.setItemAsync(INSTALL_ID_KEY, installId);
-            }
-
-            try {
-              const anonResponse = await axios.post(`${API_URL}/auth/anonymous`, {
-                installId: installId,
-              });
-              
-              const { token: anonToken, userId, username, isAnonymous } = anonResponse.data;
-              console.log("[AUTH] Anonymous user created after /me failure:", username);
-              
-              if (anonToken) {
-                await SecureStore.setItemAsync(TOKEN_KEY, anonToken);
-                axios.defaults.headers.common["Authorization"] = `Bearer ${anonToken}`;
-              }
-              
-              setUser({
-                userId: userId,
-                username: username,
-                isAnonymous: isAnonymous,
-              });
-              
-              setAuthState({
-                token: anonToken || null,
-                authenticated: true,
-                isAnonymous: true,
-              });
-            } catch (anonError) {
-              console.error("[AUTH] Error creating fallback anonymous user:", anonError);
-              // Last resort
-              const fallbackUser = `user${Math.floor(Math.random() * 1000000)}`;
-              setUser({
-                userId: fallbackUser,
-                username: fallbackUser,
-                isAnonymous: true,
-              });
-              setAuthState({
-                token: null,
-                authenticated: true,
-                isAnonymous: true,
-              });
-            }
+            console.error("[AUTH] Failed to fetch user info:", err);
+            // Set placeholder user if fetch fails
+            setUser({
+              userId: "user",
+              username: "User",
+              isAnonymous: false,
+            });
           }
+          setAuthState({
+            token: token,
+            authenticated: true,
+            isAnonymous: false,
+          });
           return;
         }
 

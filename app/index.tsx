@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import MapView from "react-native-maps";
 import { StyleSheet, View, ActivityIndicator } from "react-native";
 
@@ -7,13 +7,6 @@ import PumpModalView from "@/components/PumpModalView";
 import RightNavigation from "@/components/RightNavigation";
 import UserProfile from "@/components/UserProfile";
 import { useMarkers } from "./context/markersContext";
-
-import mobileAds from "react-native-google-mobile-ads";
-import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
-
-const adUnitId = __DEV__
-  ? TestIds.BANNER
-  : "ca-app-pub-8405702460762102/8057821207";
 
 type MarkerData = {
   _id: string;
@@ -27,13 +20,6 @@ type MarkerData = {
 export default function HomeScreen() {
   const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
   const { markers, isLoading } = useMarkers();
-
-  useEffect(() => {
-    mobileAds()
-      .initialize()
-      .then(() => console.log("✅ AdMob initialized"));
-  }, []);
-console.log(markers)
   return (
     <View style={styles.container}>
       <RightNavigation />
@@ -74,17 +60,6 @@ console.log(markers)
           onSelectMarker={setSelectedMarker}
         />
       )}
-
-      <View style={styles.bannerContainer}>
-        <BannerAd
-          unitId={adUnitId}
-          size={BannerAdSize.BANNER}
-          onAdLoaded={() => console.log("✅ Banner ad loaded",process.env.EXPO_PUBLIC_API_URL)}
-          onAdFailedToLoad={(error) =>
-            console.log("❌ Banner ad failed:", error)
-          }
-        />
-      </View>
     </View>
   );
 }
@@ -102,15 +77,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#ffffff",
-  },
-  bannerContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    backgroundColor: "#fff",
-    paddingVertical: 4,
   },
   userProfileContainer: {
     position: "absolute",
