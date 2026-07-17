@@ -1,7 +1,6 @@
 import axios from "axios";
 import { createContext, useContext, useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
-import * as Device from "expo-device";
 
 interface Authprops {
   authState?: { token: string | null; authenticated: boolean | null; isAnonymous?: boolean };
@@ -47,65 +46,74 @@ export const AuthProvide = ({ children }: any) => {
             authenticated: true,
             isAnonymous: false,
           });
-        } else {
-          // No token, check for anonymous user
+          return;
+        }
+
+        // No token, create anonymous user
+        try {
           let installId = await SecureStore.getItemAsync(INSTALL_ID_KEY);
 
           // If no install ID, generate one
           if (!installId) {
-            installId = `${Device.modelId || "device"}-${Date.now()}`;
+            installId = `device-${Date.now()}`;
             await SecureStore.setItemAsync(INSTALL_ID_KEY, installId);
           }
 
-          // Create/restore anonymous user
-          try {
-            const response = await axios.post(`${API_URL}/auth/anonymous`, {
-              installId: installId,
-            });
-            
-            const { token: anonToken, userId, username, isAnonymous } = response.data;
-            
-            // Store token for anonymous user
-            if (anonToken) {
-              await SecureStore.setItemAsync(TOKEN_KEY, anonToken);
-              axios.defaults.headers.common["Authorization"] = `Bearer ${anonToken}`;
-            }
-            
-            setUser({
-              userId: userId,
-              username: username,
-              isAnonymous: isAnonymous,
-            });
-            
-            setAuthState({
-              token: anonToken || null,
-              authenticated: true,
-              isAnonymous: true,
-            });
-          } catch (error) {
-            console.error("Error creating anonymous user:", error);
-            // Fallback: create local anonymous user
-            const randomId = Math.floor(Math.random() * 1000000);
-            const username = `user${randomId}`;
-            
-            setUser({
-              userId: username,
-              username: username,
-              isAnonymous: true,
-            });
-            
-            setAuthState({
-              token: null,
-              authenticated: true,
-              isAnonymous: true,
-            });
+          // Try to create/restore anonymous user from backend
+          const response = await axios.post(`${API_URL}/auth/anonymous`, {
+            installId: installId,
+          });
+          
+          const { token: anonToken, userId, username, isAnonymous } = response.data;
+          
+          // Store token for anonymous user
+          if (anonToken) {
+            await SecureStore.setItemAsync(TOKEN_KEY, anonToken);
+            axios.defaults.headers.common["Authorization"] = `Bearer ${anonToken}`;
           }
+          
+          setUser({
+            userId: userId,
+            username: username,
+            isAnonymous: isAnonymous,
+          });
+          
+          setAuthState({
+            token: anonToken || null,
+            authenticated: true,
+            isAnonymous: true,
+          });
+        } catch (error) {
+          console.error("[AUTH] Error creating anonymous user from backend:", error);
+          // Fallback: create local anonymous user
+          const randomId = Math.floor(Math.random() * 1000000);
+          const username = `user${randomId}`;
+          
+          setUser({
+            userId: username,
+            username: username,
+            isAnonymous: true,
+          });
+          
+          setAuthState({
+            token: null,
+            authenticated: true,
+            isAnonymous: true,
+          });
         }
       } catch (error) {
-        console.log("Error initializing user:", error);
+        console.error("[AUTH] Critical initialization error:", error);
+        // Last resort fallback
         setAuthState({
           token: null,
-          authenticated: false,
+          authenticated: true,
+          isAnonymous: true,
+        });
+        
+        setUser({
+          userId: `user${Math.floor(Math.random() * 1000000)}`,
+          username: `user${Math.floor(Math.random() * 1000000)}`,
+          isAnonymous: true,
         });
       }
     };
