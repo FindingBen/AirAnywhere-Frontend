@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { ActivityIndicator, View, StyleSheet } from "react-native";
-import Constants from "expo-constants";
+
 type MarkerData = {
   _id: string;
   name: string;
@@ -60,13 +59,13 @@ export const MarkersProvider: React.FC<{ children: React.ReactNode }> = ({
           .filter((marker): marker is MarkerData => marker !== null);
 
         setMarkers(normalizedMarkers);
+        
       }
     } catch (error) {
       console.error("Error fetching markers:", error);
     }
     setIsLoading(false);
   };
-
   return (
     <MarkersContext.Provider value={{ markers, fetchMarkers, isLoading }}>
       {children}

@@ -74,17 +74,6 @@ export default function HomeScreen() {
           onSelectMarker={setSelectedMarker}
         />
       )}
-
-      <View style={styles.bannerContainer}>
-        <BannerAd
-          unitId={adUnitId}
-          size={BannerAdSize.BANNER}
-          onAdLoaded={() => console.log("✅ Banner ad loaded",process.env.EXPO_PUBLIC_API_URL)}
-          onAdFailedToLoad={(error) =>
-            console.log("❌ Banner ad failed:", error)
-          }
-        />
-      </View>
     </View>
   );
 }
