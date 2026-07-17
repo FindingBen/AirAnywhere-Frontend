@@ -51,9 +51,9 @@ export const MarkersProvider: React.FC<{ children: React.ReactNode }> = ({
   const fetchMarkers = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_API_URL}/markers`
-      );
+      const url = `${process.env.EXPO_PUBLIC_API_URL}/markers`;
+      console.log("[MARKERS] Fetching from URL:", url);
+      const response = await axios.get(url);
       if (response.status === 200) {
         const normalizedMarkers = (response.data as ApiMarkerData[])
           .map(normalizeMarker)
