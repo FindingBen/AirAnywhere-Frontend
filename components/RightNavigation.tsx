@@ -26,6 +26,10 @@ const RightNavigation = () => {
     router.push("/login");
   };
 
+  const handleRegister = () => {
+    router.push("/signup");
+  };
+
   const handleContactUs = () => {
     router.push("/about");
   };
@@ -60,7 +64,19 @@ const RightNavigation = () => {
         />
       </TouchableOpacity>
 
-      {authState?.authenticated ? (
+      {authState?.authenticated && authState?.isAnonymous ? (
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={handleRegister}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name="account-plus"
+            size={24}
+            color="#007BFF"
+          />
+        </TouchableOpacity>
+      ) : authState?.authenticated ? (
         <TouchableOpacity
           style={styles.navButton}
           onPress={handleLogout}

@@ -5,7 +5,7 @@ import * as SecureStore from "expo-secure-store";
 interface Authprops {
   authState?: { token: string | null; authenticated: boolean | null; isAnonymous?: boolean };
   user?: { userId: string; username: string; isAnonymous: boolean } | null;
-  onRegister?: (email: string, password: string) => Promise<any>;
+  onRegister?: (email: string, password: string, username: string) => Promise<any>;
   onLogin?: (email: string, password: string) => Promise<any>;
   onLogout?: () => Promise<any>;
 }
@@ -33,6 +33,8 @@ export const AuthProvide = ({ children }: any) => {
 
   const [user, setUser] = useState<{ userId: string; username: string; isAnonymous: boolean } | null>(null);
 
+  console.log("[AUTH] Initial render - authState:", authState);
+
   useEffect(() => {
     const initializeUser = async () => {
       try {
@@ -52,7 +54,13 @@ export const AuthProvide = ({ children }: any) => {
               username: userResponse.data.username,
               isAnonymous: userResponse.data.isAnonymous || false,
             });
+            setAuthState({
+              token: token,
+              authenticated: true,
+              isAnonymous: userResponse.data.isAnonymous || false,
+            });
             console.log("[AUTH] Registered user loaded:", userResponse.data.username);
+            return;
           } catch (err) {
             console.error("[AUTH] Failed to fetch user info from /me:", err);
             console.log("[AUTH] Token was:", token.substring(0, 20) + "...");
@@ -121,13 +129,17 @@ export const AuthProvide = ({ children }: any) => {
             await SecureStore.setItemAsync(INSTALL_ID_KEY, installId);
           }
 
+          console.log("[AUTH] No token found, creating anonymous user with installId:", installId);
+          console.log("[AUTH] API URL:", API_URL);
+
           // Try to create/restore anonymous user from backend
           const response = await axios.post(`${API_URL}/auth/anonymous`, {
             installId: installId,
           });
           
+          console.log("[AUTH] Anonymous response received:", response.data);
           const { token: anonToken, userId, username, isAnonymous } = response.data;
-          console.log("[AUTH] Anonymous user created:", username);
+          console.log("[AUTH] Anonymous user created:", username, "Token:", !!anonToken);
           
           // Store token for anonymous user
           if (anonToken) {
@@ -146,8 +158,10 @@ export const AuthProvide = ({ children }: any) => {
             authenticated: true,
             isAnonymous: true,
           });
+          console.log("[AUTH] Auth state set to authenticated: true");
         } catch (error) {
           console.error("[AUTH] Error creating anonymous user from backend:", error);
+          console.error("[AUTH] Error details:", (error as any).response?.data || error);
           // Fallback: create local anonymous user
           const randomId = Math.floor(Math.random() * 1000000);
           const username = `user${randomId}`;
@@ -164,6 +178,7 @@ export const AuthProvide = ({ children }: any) => {
             authenticated: true,
             isAnonymous: true,
           });
+          console.log("[AUTH] Fallback: Auth state set to authenticated: true");
         }
       } catch (error) {
         console.error("[AUTH] Critical initialization error:", error);
@@ -182,6 +197,7 @@ export const AuthProvide = ({ children }: any) => {
           isAnonymous: true,
         });
       }
+      console.log("[AUTH] ✅ Initialization complete");
     };
     initializeUser();
   }, []);

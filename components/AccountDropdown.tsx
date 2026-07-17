@@ -32,6 +32,11 @@ const AccountDropdown = () => {
     router.push("/login");
   };
 
+  const handleRegister = () => {
+    setMenuVisible(false);
+    router.push("/signup");
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -57,7 +62,21 @@ const AccountDropdown = () => {
         >
           <View style={styles.dropdownContainer}>
             <View style={styles.dropdown}>
-              {authState?.authenticated ? (
+              {authState?.authenticated && authState?.isAnonymous ? (
+                // Anonymous user - show Register button
+                <TouchableOpacity
+                  style={styles.registerButton}
+                  onPress={handleRegister}
+                >
+                  <MaterialCommunityIcons
+                    name="account-plus"
+                    size={20}
+                    color="#007BFF"
+                  />
+                  <Text style={styles.registerButtonText}>Create Account</Text>
+                </TouchableOpacity>
+              ) : authState?.authenticated ? (
+                // Registered user - show Logout button
                 <TouchableOpacity
                   style={styles.logoutButton}
                   onPress={handleLogout}
@@ -70,6 +89,7 @@ const AccountDropdown = () => {
                   <Text style={styles.logoutText}>Logout</Text>
                 </TouchableOpacity>
               ) : (
+                // Not authenticated - show Login button
                 <TouchableOpacity
                   style={styles.loginButton}
                   onPress={handleLogin}
@@ -142,6 +162,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#4CAF50",
+  },
+  registerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    gap: 12,
+  },
+  registerButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#007BFF",
   },
 });
 

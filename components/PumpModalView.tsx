@@ -10,6 +10,10 @@ const PumpModalView = ({ pump, onSelectMarker }) => {
   const { authState } = useAuth();
   const { fetchMarkers } = useMarkers();
   const [votingLoading, setVotingLoading] = useState(false);
+  
+  console.log("[MODAL] Auth state:", authState);
+  console.log("[MODAL] Authenticated:", authState?.authenticated);
+  console.log("[MODAL] Token:", authState?.token ? "exists" : "null");
   const copyToClipboard = (latitude: number, longitude: number) => {
     const coordinates = `${latitude}, ${longitude}`;
     Clipboard.setStringAsync(coordinates);
@@ -96,37 +100,66 @@ const PumpModalView = ({ pump, onSelectMarker }) => {
         style={styles.xButton}
         onPress={() => onSelectMarker(null)}
       >
-        <Text style={styles.xButtonText}>X</Text>
+        <Text style={styles.xButtonText}>✕</Text>
       </TouchableOpacity>
-      <Text style={styles.title}>{pump?.name}</Text>
-      <Text style={styles.ratingLabel}>Other cyclists' rating for this pump</Text>
-      <View style={styles.ratingView}>
-        <View style={styles.ratingItem}>
-          <Text style={styles.arrowUp}>▲</Text>
-          <Text style={styles.ratingValue}>{pump?.positive || 0}</Text>
-          <Text style={styles.arrowLabel}>Working</Text>
-        </View>
-        <View style={styles.ratingItem}>
-          <Text style={styles.arrowDown}>▼</Text>
-          <Text style={styles.ratingValue}>{pump?.negative || 0}</Text>
-          <Text style={styles.arrowLabel}>Broken</Text>
+
+      {/* Header with Status Badge */}
+      <View style={styles.headerView}>
+        <Text style={styles.title}>{pump?.name}</Text>
+        <View
+          style={[
+            styles.statusBadge,
+            pump?.status === "Works"
+              ? styles.statusWorking
+              : styles.statusBroken,
+          ]}
+        >
+          <Text
+            style={[
+              styles.statusText,
+              {
+                color:
+                  pump?.status === "Works" ? "#2E7D32" : "#C62828",
+              },
+            ]}
+          >
+            {pump?.status === "Works" ? "✓ Working" : "⚠ Broken"}
+          </Text>
         </View>
       </View>
-      {/* <Text style={styles.description}>{pump?.status}</Text> */}
-      <View style={styles.buttonView}>
+
+      {/* Coordinates Section */}
+      <View style={styles.coordinatesSection}>
+        <Text style={styles.sectionLabel}>📍 Location</Text>
+        <Text style={styles.coordinates}>
+          {pump?.latitude.toFixed(4)}, {pump?.longitude.toFixed(4)}
+        </Text>
         <TouchableOpacity
-          style={styles.button}
+          style={styles.smallButton}
           onPress={() => copyToClipboard(pump?.latitude, pump?.longitude)}
         >
-          <Text style={styles.buttonText}>Copy Coordinates</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => openInGoogleMaps(pump.latitude, pump.longitude)}
-        >
-          <Text style={styles.buttonText}>Open in Google Maps</Text>
+          <Text style={styles.smallButtonText}>Copy</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Community Feedback Section */}
+      <View style={styles.feedbackSection}>
+        <Text style={styles.sectionLabel}>👥 Community Feedback</Text>
+        <View style={styles.feedbackGrid}>
+          <View style={[styles.feedbackBox, styles.workingBox]}>
+            <Text style={styles.feedbackEmoji}>✓</Text>
+            <Text style={styles.feedbackCount}>{pump?.positive || 0}</Text>
+            <Text style={styles.feedbackLabel}>Working</Text>
+          </View>
+          <View style={[styles.feedbackBox, styles.brokenBox]}>
+            <Text style={styles.feedbackEmoji}>✕</Text>
+            <Text style={styles.feedbackCount}>{pump?.negative || 0}</Text>
+            <Text style={styles.feedbackLabel}>Broken</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Voting Buttons */}
       {authState?.authenticated && (
         <View style={styles.voteButtonView}>
           <TouchableOpacity
@@ -134,118 +167,193 @@ const PumpModalView = ({ pump, onSelectMarker }) => {
             onPress={() => handleVote("upvote")}
             disabled={votingLoading}
           >
-            <Text style={styles.voteButtonText}>👍 Works</Text>
+            <Text style={styles.voteEmoji}>✓</Text>
+            <Text style={styles.voteButtonText}>Works</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.voteButton, styles.downvoteButton]}
             onPress={() => handleVote("downvote")}
             disabled={votingLoading}
           >
-            <Text style={styles.voteButtonText}>🔧 Broken</Text>
+            <Text style={styles.voteEmoji}>✕</Text>
+            <Text style={styles.voteButtonText}>Broken</Text>
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Navigation Button */}
+      <TouchableOpacity
+        style={styles.mapsButton}
+        onPress={() => openInGoogleMaps(pump.latitude, pump.longitude)}
+      >
+        <Text style={styles.mapsButtonText}>🗺️ Open in Maps</Text>
+      </TouchableOpacity>
     </View>
   );
-};
+  };
 
 export default PumpModalView;
 
 function createStyles(status: string) {
   return StyleSheet.create({
     card: {
-      backgroundColor: "#FEFAE0",
       position: "absolute",
-      bottom: 50,
-      left: 30,
-      padding: 16,
-      width: "85%",
-      borderRadius: 16,
+      bottom: 64,
+      left: 0,
+      right: 0,
+      backgroundColor: "#FFFFFF",
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingTop: 24,
+      paddingHorizontal: 20,
+      paddingBottom: 20,
       shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 5,
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 12,
+      elevation: 10,
+    },
+
+    xButton: {
+      position: "absolute",
+      right: 20,
+      top: 16,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: "#F0F0F0",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 10,
+    },
+    xButtonText: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: "#666",
+    },
+
+    headerView: {
+      marginBottom: 14,
+      paddingRight: 40,
     },
     title: {
-      fontWeight: "700",
+      fontWeight: "800",
       fontSize: 22,
-      color: "#626F47",
+      color: "#1a1a1a",
       marginBottom: 8,
     },
-    ratingLabel: {
-      fontSize: 12,
-      color: "#A4B465",
-      fontWeight: "500",
-      marginBottom: 8,
-      textAlign: "left",
+    statusBadge: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 20,
+      alignSelf: "flex-start",
     },
-    ratingView: {
-      flexDirection: "row",
-      justifyContent: "flex-start",
-      gap: 24,
+    statusWorking: {
+      backgroundColor: "#E8F5E9",
+      borderColor: "#4CAF50",
+      borderWidth: 1.5,
+    },
+    statusBroken: {
+      backgroundColor: "#FFEBEE",
+      borderColor: "#F44336",
+      borderWidth: 1.5,
+    },
+    statusText: {
+      fontSize: 13,
+      fontWeight: "700",
+    },
+
+    sectionLabel: {
+      fontSize: 13,
+      fontWeight: "700",
+      color: "#999",
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      marginBottom: 10,
+    },
+
+    coordinatesSection: {
+      backgroundColor: "#F9F9F9",
+      borderRadius: 12,
+      padding: 12,
       marginBottom: 12,
     },
-    ratingItem: {
-      alignItems: "center",
-      gap: 4,
-    },
-    arrowUp: {
-      fontSize: 16,
-      color: "#4CAF50",
-      fontWeight: "600",
-    },
-    arrowDown: {
-      fontSize: 16,
-      color: "#F44336",
-      fontWeight: "600",
-    },
-    ratingValue: {
+    coordinates: {
       fontSize: 13,
-      color: "#626F47",
+      color: "#333",
+      fontWeight: "600",
+      marginBottom: 8,
+      fontFamily: "Menlo",
+    },
+    smallButton: {
+      backgroundColor: "#007BFF",
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 8,
+      alignSelf: "flex-start",
+    },
+    smallButtonText: {
+      color: "#FFF",
+      fontSize: 12,
       fontWeight: "600",
     },
-    arrowLabel: {
-      fontSize: 11,
-      color: "#626F47",
-      fontWeight: "500",
+
+    feedbackSection: {
+      marginBottom: 16,
     },
-    description: {
-      fontSize: 15,
-      color: status === "Works" ? "#FFCF50" : "#A4B465",
-      marginTop: 5,
-      fontWeight: "600",
-    },
-    buttonView: {
+    feedbackGrid: {
       flexDirection: "row",
-      marginTop: 16,
-      gap: 10,
+      gap: 12,
     },
-    button: {
+    feedbackBox: {
       flex: 1,
       borderRadius: 12,
+      padding: 10,
+      alignItems: "center",
       justifyContent: "center",
-      borderColor: "#626F47",
       borderWidth: 2,
-      paddingVertical: 12,
     },
-    buttonText: {
-      color: "#626F47",
-      fontSize: 14,
-      fontWeight: "700",
-      textAlign: "center",
+    workingBox: {
+      backgroundColor: "#F0F9FF",
+      borderColor: "#4CAF50",
+    },
+    brokenBox: {
+      backgroundColor: "#FFF5F5",
+      borderColor: "#F44336",
+    },
+    feedbackEmoji: {
+      fontSize: 20,
+      marginBottom: 4,
+    },
+    feedbackCount: {
+      fontSize: 18,
+      fontWeight: "800",
+      color: "#333",
+      marginBottom: 2,
+    },
+    feedbackLabel: {
+      fontSize: 11,
+      color: "#666",
+      fontWeight: "600",
+    },
+
+    actionSection: {
+      marginBottom: 18,
     },
     voteButtonView: {
       flexDirection: "row",
-      marginTop: 12,
-      gap: 10,
+      gap: 12,
+      marginBottom: 12,
     },
     voteButton: {
       flex: 1,
-      borderRadius: 12,
+      borderRadius: 14,
+      paddingVertical: 12,
+      alignItems: "center",
       justifyContent: "center",
-      paddingVertical: 10,
-      borderWidth: 2,
+      borderWidth: 2.5,
+      flexDirection: "row",
+      gap: 6,
     },
     upvoteButton: {
       backgroundColor: "#E8F5E9",
@@ -255,26 +363,28 @@ function createStyles(status: string) {
       backgroundColor: "#FFEBEE",
       borderColor: "#F44336",
     },
-    voteButtonText: {
-      fontSize: 13,
-      fontWeight: "600",
-      textAlign: "center",
+    voteEmoji: {
+      fontSize: 18,
     },
-    xButton: {
-      backgroundColor: "#626F47",
-      position: "absolute",
-      right: 12,
-      top: 12,
-      borderRadius: 12,
+    voteButtonText: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: "#333",
+    },
+
+    mapsButton: {
+      backgroundColor: "#007BFF",
+      borderRadius: 14,
+      paddingVertical: 12,
       alignItems: "center",
       justifyContent: "center",
-      width: 32,
-      height: 32,
+      flexDirection: "row",
+      gap: 8,
     },
-    xButtonText: {
+    mapsButtonText: {
+      fontSize: 15,
       fontWeight: "700",
-      fontSize: 16,
-      color: "#FEFAE0",
+      color: "#FFF",
     },
   });
 }
