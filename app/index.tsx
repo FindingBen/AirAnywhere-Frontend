@@ -74,6 +74,17 @@ export default function HomeScreen() {
           onSelectMarker={setSelectedMarker}
         />
       )}
+
+      <View style={styles.bannerContainer}>
+        <BannerAd
+          unitId={adUnitId}
+          size={BannerAdSize.BANNER}
+          onAdLoaded={() => console.log("✅ Banner ad loaded",process.env.EXPO_PUBLIC_API_URL)}
+          onAdFailedToLoad={(error) =>
+            console.log("❌ Banner ad failed:", error)
+          }
+        />
+      </View>
     </View>
   );
 }
@@ -84,7 +95,7 @@ const styles = StyleSheet.create({
   },
   map: {
     width: "100%",
-    height: "100%",
+    flex: 1,
   },
   loaderContainer: {
     flex: 1,
@@ -103,7 +114,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    height: 60,
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#fff",
     paddingVertical: 4,
   },
