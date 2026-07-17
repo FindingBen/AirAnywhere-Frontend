@@ -52,7 +52,7 @@ export const MarkersProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_API_URL}markers`
+        `${process.env.EXPO_PUBLIC_API_URL}/markers`
       );
       if (response.status === 200) {
         const normalizedMarkers = (response.data as ApiMarkerData[])

@@ -5,6 +5,7 @@ import { StyleSheet, View, ActivityIndicator } from "react-native";
 import CustomMarker from "@/components/CustomMarker";
 import PumpModalView from "@/components/PumpModalView";
 import RightNavigation from "@/components/RightNavigation";
+import UserProfile from "@/components/UserProfile";
 import { useMarkers } from "./context/markersContext";
 
 import mobileAds from "react-native-google-mobile-ads";
@@ -36,6 +37,9 @@ console.log(markers)
   return (
     <View style={styles.container}>
       <RightNavigation />
+      <View style={styles.userProfileContainer}>
+        <UserProfile />
+      </View>
       {isLoading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#007BFF" />
@@ -107,5 +111,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
     paddingVertical: 4,
+  },
+  userProfileContainer: {
+    position: "absolute",
+    top: 52,
+    left: 16,
+    zIndex: 100,
   },
 });
