@@ -21,6 +21,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "./authentication/auth";
 import { useColorScheme } from "@/hooks/useColorScheme.web";
 import axios from "axios";
+import { buildApiUrl } from "@/utils/api";
 
 type PumpData = {
   name: string;
@@ -88,10 +89,7 @@ export default function addPump() {
     };
 
     try {
-      let response = await axios.post(
-        "http://192.168.1.105:5000/markers",
-        requestBody
-      );
+      let response = await axios.post(buildApiUrl("/markers"), requestBody);
 
       Alert.alert(
         "Success",

@@ -12,6 +12,7 @@ import { useColorScheme } from "@/hooks/useColorScheme.web";
 import { MENU_ITEMS } from "@/constants/MenuItems";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { buildApiUrl } from "@/utils/api";
 
 type MarkerData = {
   id: string;
@@ -38,7 +39,7 @@ export default function PumpScreen() {
 
   const getMarkers = async () => {
     try {
-      let response = await axios.get("http://192.168.1.105:5000/markers");
+      let response = await axios.get(buildApiUrl("/markers"));
       if (response.status === 200) {
         setMarkers(response.data);
       }

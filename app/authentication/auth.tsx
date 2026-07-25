@@ -1,6 +1,11 @@
 import axios from "axios";
 import { createContext, useContext, useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
+import {
+  API_BASE_URL,
+  buildApiUrl,
+  hasConfiguredApiBaseUrl,
+} from "@/utils/api";
 
 interface Authprops {
   authState?: { token: string | null; authenticated: boolean | null; isAnonymous?: boolean };
@@ -13,7 +18,6 @@ interface Authprops {
 const TOKEN_KEY = "AUTH_TOKEN";
 const USER_ID_KEY = "ANON_USER_ID";
 const INSTALL_ID_KEY = "INSTALL_ID";
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.105:5000";
 const AuthContext = createContext<Authprops>({});
 
 export const useAuth = () => {
@@ -38,6 +42,14 @@ export const AuthProvide = ({ children }: any) => {
   useEffect(() => {
     const initializeUser = async () => {
       try {
+        console.log("[AUTH] Resolved API base URL:", API_BASE_URL || "<empty>");
+
+        if (!hasConfiguredApiBaseUrl) {
+          console.error(
+            "[AUTH] EXPO_PUBLIC_API_URL is missing. Configure it for this build profile."
+          );
+        }
+
         console.log("[AUTH] Initializing user...");
         // First check if user has a token (registered/logged in)
         const token = await SecureStore.getItemAsync(TOKEN_KEY);
@@ -48,7 +60,7 @@ export const AuthProvide = ({ children }: any) => {
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           // Fetch user info for registered user
           try {
-            const userResponse = await axios.get(`${API_URL}/me`);
+            const userResponse = await axios.get(buildApiUrl("/me"));
             setUser({
               userId: userResponse.data.userId,
               username: userResponse.data.username,
@@ -64,7 +76,7 @@ export const AuthProvide = ({ children }: any) => {
           } catch (err) {
             console.error("[AUTH] Failed to fetch user info from /me:", err);
             console.log("[AUTH] Token was:", token.substring(0, 20) + "...");
-            console.log("[AUTH] API URL:", API_URL);
+            console.log("[AUTH] API URL:", buildApiUrl(""));
             // Token exists but user not found - clear it and create anonymous user instead
             await SecureStore.deleteItemAsync(TOKEN_KEY);
             console.log("[AUTH] Clearing invalid token, creating anonymous user instead");
@@ -77,7 +89,7 @@ export const AuthProvide = ({ children }: any) => {
             }
 
             try {
-              const anonResponse = await axios.post(`${API_URL}/auth/anonymous`, {
+              const anonResponse = await axios.post(buildApiUrl("/auth/anonymous"), {
                 installId: installId,
               });
               
@@ -130,10 +142,10 @@ export const AuthProvide = ({ children }: any) => {
           }
 
           console.log("[AUTH] No token found, creating anonymous user with installId:", installId);
-          console.log("[AUTH] API URL:", API_URL);
+          console.log("[AUTH] API URL:", buildApiUrl(""));
 
           // Try to create/restore anonymous user from backend
-          const response = await axios.post(`${API_URL}/auth/anonymous`, {
+          const response = await axios.post(buildApiUrl("/auth/anonymous"), {
             installId: installId,
           });
           
@@ -205,8 +217,8 @@ export const AuthProvide = ({ children }: any) => {
   const register = async (email: string, password: string, username:string) => {
     try {
       console.log("[REGISTER] Attempting registration for:", email);
-      console.log("[REGISTER] API URL:", API_URL);
-      const response = await axios.post(`${API_URL}/register`, {
+      console.log("[REGISTER] API URL:", buildApiUrl(""));
+      const response = await axios.post(buildApiUrl("/register"), {
         email,
         password,
         username
@@ -228,7 +240,7 @@ export const AuthProvide = ({ children }: any) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post(`${API_URL}/login`, {
+      const response = await axios.post(buildApiUrl("/login"), {
         email,
         password,
       });

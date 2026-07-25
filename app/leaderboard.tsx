@@ -4,11 +4,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
+import { buildApiUrl } from "@/utils/api";
 
 type User = {
   rank: number;
   username: string;
   contributionScore: number;
+};
+
+type ApiUser = {
+  username: string;
+  contributionPoints: number;
 };
 
 const leaderboard = () => {
@@ -23,18 +29,19 @@ const leaderboard = () => {
   const fetchLeaderboard = async () => {
     try {
       setIsLoading(true);
-      const url = `${process.env.EXPO_PUBLIC_API_URL}/users`;
+      const url = buildApiUrl("/users");
       console.log("Fetching leaderboard from:", url);
       
       const response = await axios.get(url);
+      const apiUsers = response.data as ApiUser[];
 
       // Sort by contributionPoints descending and add rank
-      const sortedUsers = response.data
+      const sortedUsers = apiUsers
         .sort(
-          (a, b) => b.contributionPoints - a.contributionPoints
+          (a: ApiUser, b: ApiUser) => b.contributionPoints - a.contributionPoints
         )
         .slice(0, 5) // Top 5
-        .map((user, index) => ({
+        .map((user: ApiUser, index: number) => ({
           rank: index + 1,
           username: user.username,
           contributionScore: user.contributionPoints,

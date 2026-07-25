@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useAuth } from "./authentication/auth";
 import axios from "axios";
+import { buildApiUrl } from "@/utils/api";
 
 const about = () => {
   const router = useRouter();
@@ -38,7 +39,7 @@ const about = () => {
 
     try {
       const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_API_URL}/reviews`,
+        buildApiUrl("/reviews"),
         { text: trimmed },
         {
           headers: {

@@ -5,8 +5,24 @@ import * as Clipboard from "expo-clipboard";
 import axios from "axios";
 import { useAuth } from "../app/authentication/auth";
 import { useMarkers } from "../app/context/markersContext";
+import { buildApiUrl } from "@/utils/api";
 
-const PumpModalView = ({ pump, onSelectMarker }) => {
+type PumpData = {
+  _id: string;
+  name: string;
+  status: string;
+  latitude: number;
+  longitude: number;
+  positive?: number;
+  negative?: number;
+};
+
+type PumpModalViewProps = {
+  pump: PumpData;
+  onSelectMarker: (marker: PumpData | null) => void;
+};
+
+const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
   const { authState } = useAuth();
   const { fetchMarkers } = useMarkers();
   const [votingLoading, setVotingLoading] = useState(false);
@@ -65,15 +81,15 @@ const PumpModalView = ({ pump, onSelectMarker }) => {
       console.log("Sending vote:", voteData);
 
       const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_API_URL}/vote`,
+        buildApiUrl("/vote"),
         voteData
       );
 
       // Update pump counts locally for immediate UI feedback
       const updatedPump = {
         ...pump,
-        positive: pump.positive + (voteType === "upvote" ? 1 : 0),
-        negative: pump.negative + (voteType === "downvote" ? 1 : 0),
+        positive: (pump.positive ?? 0) + (voteType === "upvote" ? 1 : 0),
+        negative: (pump.negative ?? 0) + (voteType === "downvote" ? 1 : 0),
       };
       onSelectMarker(updatedPump);
 

@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import {
+  API_BASE_URL,
+  buildApiUrl,
+  hasConfiguredApiBaseUrl,
+} from "@/utils/api";
 
 type MarkerData = {
   _id: string;
@@ -49,8 +54,18 @@ export const MarkersProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const fetchMarkers = async () => {
     setIsLoading(true);
+    const url = buildApiUrl("/markers");
+
     try {
-      const url = `${process.env.EXPO_PUBLIC_API_URL}/markers`;
+      if (!hasConfiguredApiBaseUrl) {
+        console.error(
+          "[MARKERS] EXPO_PUBLIC_API_URL is missing. Configure it for the build profile."
+        );
+        console.error("[MARKERS] Resolved API base URL:", API_BASE_URL || "<empty>");
+        setMarkers([]);
+        return;
+      }
+
       console.log("[MARKERS] Fetching from URL:", url);
       const response = await axios.get(url);
       if (response.status === 200) {
@@ -59,12 +74,20 @@ export const MarkersProvider: React.FC<{ children: React.ReactNode }> = ({
           .filter((marker): marker is MarkerData => marker !== null);
 
         setMarkers(normalizedMarkers);
-        
       }
-    } catch (error) {
-      console.error("Error fetching markers:", error);
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        console.error("[MARKERS] Request failed");
+        console.error("[MARKERS] URL:", url);
+        console.error("[MARKERS] Message:", error.message);
+        console.error("[MARKERS] Status:", error.response?.status);
+        console.error("[MARKERS] Data:", error.response?.data);
+      } else {
+        console.error("[MARKERS] Unexpected error:", error);
+      }
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
   return (
     <MarkersContext.Provider value={{ markers, fetchMarkers, isLoading }}>
