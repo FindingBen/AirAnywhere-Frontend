@@ -15,12 +15,15 @@ import { useAuth } from "./authentication/auth";
 import { LinearGradient } from "expo-linear-gradient";
 import { TextInput } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [username, setUsername] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const { onRegister } = useAuth();
   const router = useRouter();
@@ -110,24 +113,56 @@ const signup = () => {
                               editable={!loading}
                               keyboardType="default"
                             />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor="#A4B465"
-                secureTextEntry={true}
-                onChangeText={(text: string) => setPassword(text)}
-                value={password}
-                editable={!loading}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm Password"
-                placeholderTextColor="#A4B465"
-                secureTextEntry={true}
-                onChangeText={(text: string) => setConfirmPassword(text)}
-                value={confirmPassword}
-                editable={!loading}
-              />
+              <View style={styles.passwordField}>
+                <TextInput
+                  style={[styles.input, styles.passwordInput]}
+                  placeholder="Password"
+                  placeholderTextColor="#A4B465"
+                  secureTextEntry={!passwordVisible}
+                  onChangeText={(text: string) => setPassword(text)}
+                  value={password}
+                  editable={!loading}
+                />
+                <TouchableOpacity
+                  style={styles.visibilityButton}
+                  onPress={() => setPasswordVisible((visible) => !visible)}
+                  accessibilityRole="button"
+                  accessibilityLabel={passwordVisible ? "Hide password" : "Show password"}
+                  hitSlop={8}
+                >
+                  <MaterialCommunityIcons
+                    name={passwordVisible ? "eye-off-outline" : "eye-outline"}
+                    size={22}
+                    color="#626F47"
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.passwordField}>
+                <TextInput
+                  style={[styles.input, styles.passwordInput]}
+                  placeholder="Confirm Password"
+                  placeholderTextColor="#A4B465"
+                  secureTextEntry={!confirmPasswordVisible}
+                  onChangeText={(text: string) => setConfirmPassword(text)}
+                  value={confirmPassword}
+                  editable={!loading}
+                />
+                <TouchableOpacity
+                  style={styles.visibilityButton}
+                  onPress={() =>
+                    setConfirmPasswordVisible((visible) => !visible)
+                  }
+                  accessibilityRole="button"
+                  accessibilityLabel={confirmPasswordVisible ? "Hide confirmed password" : "Show confirmed password"}
+                  hitSlop={8}
+                >
+                  <MaterialCommunityIcons
+                    name={confirmPasswordVisible ? "eye-off-outline" : "eye-outline"}
+                    size={22}
+                    color="#626F47"
+                  />
+                </TouchableOpacity>
+              </View>
 
               <TouchableOpacity
                 onPress={handleSignup}
@@ -193,6 +228,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#626F47",
     fontWeight: "500",
+  },
+  passwordField: {
+    position: "relative",
+    justifyContent: "center",
+  },
+  passwordInput: {
+    width: "100%",
+    paddingRight: 50,
+  },
+  visibilityButton: {
+    position: "absolute",
+    right: 14,
+    height: 44,
+    width: 30,
+    alignItems: "center",
+    justifyContent: "center",
   },
   button: {
     height: 50,
