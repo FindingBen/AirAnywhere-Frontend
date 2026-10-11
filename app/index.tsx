@@ -22,7 +22,9 @@ type MarkerData = {
   status: string;
   latitude: number;
   longitude: number;
-  address: string;
+  address?: string;
+  imageUrl?: string | null;
+  imageUpdatedAt?: string | null;
 };
 
 export default function HomeScreen() {

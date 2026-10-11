@@ -32,6 +32,13 @@
           "backgroundColor": "#000000"
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to choose a pump photo.",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to take a pump photo."
+        }
+      ],
       "expo-secure-store",
       [
         "react-native-google-mobile-ads",

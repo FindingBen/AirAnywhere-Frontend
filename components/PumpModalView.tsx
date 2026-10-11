@@ -1,7 +1,17 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Image,
+  ActivityIndicator,
+  Platform,
+} from "react-native";
 import React, { useState } from "react";
 import * as Linking from "expo-linking";
 import * as Clipboard from "expo-clipboard";
+import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { useAuth } from "../app/authentication/auth";
 import { useMarkers } from "../app/context/markersContext";
@@ -13,8 +23,11 @@ type PumpData = {
   status: string;
   latitude: number;
   longitude: number;
+  address?: string;
   positive?: number;
   negative?: number;
+  imageUrl?: string | null;
+  imageUpdatedAt?: string | null;
 };
 
 type PumpModalViewProps = {
@@ -26,6 +39,10 @@ const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
   const { authState } = useAuth();
   const { fetchMarkers } = useMarkers();
   const [votingLoading, setVotingLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+  const canUploadImage = Boolean(
+    authState?.authenticated && !authState?.isAnonymous
+  );
   
   console.log("[MODAL] Auth state:", authState);
   console.log("[MODAL] Authenticated:", authState?.authenticated);
@@ -107,6 +124,120 @@ const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
     }
   };
 
+  const uploadPumpImage = async (asset: ImagePicker.ImagePickerAsset) => {
+    if (!canUploadImage || !authState?.token) {
+      Alert.alert("Authentication Required", "Please login to add a pump photo.");
+      return;
+    }
+
+    setImageLoading(true);
+    try {
+      const formData = new FormData();
+      const fileName = asset.fileName || "pump-photo.jpg";
+      const fileType = asset.mimeType || "image/jpeg";
+
+      if (Platform.OS === "web" && asset.file) {
+        formData.append("image", asset.file, fileName);
+      } else if (Platform.OS === "web") {
+        const imageResponse = await fetch(asset.uri);
+        const imageBlob = await imageResponse.blob();
+        formData.append("image", imageBlob, fileName);
+      } else {
+        formData.append(
+          "image",
+          { uri: asset.uri, name: fileName, type: fileType } as unknown as Blob
+        );
+      }
+
+      const response = await axios.post(
+        buildApiUrl(`/markers/${encodeURIComponent(pump._id)}/image`),
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${authState.token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const savedPump = response.data?.marker ?? response.data?.pump ?? response.data;
+      const imageUrl =
+        savedPump?.imageUrl ?? savedPump?.image?.url ?? response.data?.imageUrl;
+      const imageUpdatedAt =
+        savedPump?.imageUpdatedAt ??
+        savedPump?.image?.updatedAt ??
+        response.data?.imageUpdatedAt ??
+        new Date().toISOString();
+
+      if (!imageUrl) {
+        throw new Error("The server did not return the uploaded image URL.");
+      }
+
+      onSelectMarker({ ...pump, ...savedPump, imageUrl, imageUpdatedAt });
+      await fetchMarkers();
+    } catch (error: any) {
+      const message =
+        error.response?.data?.error || error.message || "Please try again.";
+      Alert.alert("Photo Upload Failed", message);
+    } finally {
+      setImageLoading(false);
+    }
+  };
+
+  const choosePumpImage = async (source: "camera" | "library") => {
+    if (!canUploadImage) {
+      Alert.alert("Authentication Required", "Please login to add a pump photo.");
+      return;
+    }
+
+    try {
+      if (Platform.OS !== "web") {
+        const permission =
+          source === "camera"
+            ? await ImagePicker.requestCameraPermissionsAsync()
+            : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (!permission.granted) {
+          Alert.alert(
+            "Permission Needed",
+            source === "camera"
+              ? "Allow camera access to take a pump photo."
+              : "Allow photo library access to choose a pump photo."
+          );
+          return;
+        }
+      }
+
+      const options = {
+        mediaTypes: ["images"] as ImagePicker.MediaType[],
+        allowsEditing: true,
+        aspect: [4, 3] as [number, number],
+        quality: 0.8,
+      };
+      const result =
+        source === "camera"
+          ? await ImagePicker.launchCameraAsync(options)
+          : await ImagePicker.launchImageLibraryAsync(options);
+
+      if (!result.canceled && result.assets[0]) {
+        await uploadPumpImage(result.assets[0]);
+      }
+    } catch (error: any) {
+      Alert.alert(
+        "Unable to Select Photo",
+        error.message || "Please try again."
+      );
+    }
+  };
+
+  const imageDate = pump.imageUpdatedAt
+    ? new Date(pump.imageUpdatedAt)
+    : null;
+  const imageDateLabel =
+    imageDate && Number.isFinite(imageDate.getTime())
+      ? `Updated ${imageDate.toLocaleDateString()}`
+      : "No photo yet";
+
 
   const styles = createStyles(pump?.status);
   return (
@@ -144,18 +275,66 @@ const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
         </View>
       </View>
 
-      {/* Coordinates Section */}
-      <View style={styles.coordinatesSection}>
-        <Text style={styles.sectionLabel}>📍 Location</Text>
-        <Text style={styles.coordinates}>
-          {pump?.latitude.toFixed(4)}, {pump?.longitude.toFixed(4)}
-        </Text>
-        <TouchableOpacity
-          style={styles.smallButton}
-          onPress={() => copyToClipboard(pump?.latitude, pump?.longitude)}
-        >
-          <Text style={styles.smallButtonText}>Copy</Text>
-        </TouchableOpacity>
+      {/* Location and pump photo */}
+      <View style={styles.locationPhotoRow}>
+        <View style={[styles.coordinatesSection, styles.locationColumn]}>
+          <Text style={styles.sectionLabel}>📍 Location</Text>
+          <Text style={styles.coordinates}>
+            {pump?.latitude.toFixed(4)}, {pump?.longitude.toFixed(4)}
+          </Text>
+          <TouchableOpacity
+            style={styles.smallButton}
+            onPress={() => copyToClipboard(pump?.latitude, pump?.longitude)}
+          >
+            <Text style={styles.smallButtonText}>Copy</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.photoColumn}>
+          <View style={styles.photoFrame}>
+            {pump.imageUrl ? (
+              <Image
+                source={{ uri: pump.imageUrl }}
+                style={styles.pumpImage}
+                resizeMode="cover"
+                accessibilityLabel={`${pump.name} photo`}
+              />
+            ) : (
+              <View style={styles.emptyPhoto}>
+                <Text style={styles.emptyPhotoIcon}>▧</Text>
+                <Text style={styles.emptyPhotoText}>Pump photo</Text>
+              </View>
+            )}
+            {imageLoading && (
+              <View style={styles.imageLoadingOverlay}>
+                <ActivityIndicator color="#FFFFFF" />
+              </View>
+            )}
+          </View>
+          <Text style={styles.imageDate} numberOfLines={1}>
+            {imageDateLabel}
+          </Text>
+          {canUploadImage && (
+            <View style={styles.photoActions}>
+              <TouchableOpacity
+                style={styles.photoActionButton}
+                onPress={() => choosePumpImage("library")}
+                disabled={imageLoading}
+                accessibilityLabel="Choose photo from library"
+              >
+                <Text style={styles.photoActionText}>Gallery</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.photoActionButton}
+                onPress={() => choosePumpImage("camera")}
+                disabled={imageLoading}
+                accessibilityLabel="Take pump photo"
+              >
+                <Text style={styles.photoActionText}>Camera</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </View>
 
       {/* Community Feedback Section */}
@@ -293,6 +472,74 @@ function createStyles(status: string) {
       borderRadius: 12,
       padding: 12,
       marginBottom: 12,
+    },
+    locationPhotoRow: {
+      flexDirection: "row",
+      alignItems: "stretch",
+      gap: 10,
+      marginBottom: 12,
+    },
+    locationColumn: {
+      flex: 1,
+      minWidth: 0,
+      marginBottom: 0,
+    },
+    photoColumn: {
+      width: 132,
+    },
+    photoFrame: {
+      height: 94,
+      borderRadius: 12,
+      overflow: "hidden",
+      backgroundColor: "#E9F0EE",
+    },
+    pumpImage: {
+      width: "100%",
+      height: "100%",
+    },
+    emptyPhoto: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 4,
+    },
+    emptyPhotoIcon: {
+      fontSize: 24,
+      color: "#57766D",
+    },
+    emptyPhotoText: {
+      fontSize: 11,
+      color: "#57766D",
+      fontWeight: "600",
+    },
+    imageLoadingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.45)",
+    },
+    imageDate: {
+      color: "#6D7774",
+      fontSize: 10,
+      marginTop: 5,
+      textAlign: "center",
+    },
+    photoActions: {
+      flexDirection: "row",
+      gap: 5,
+      marginTop: 5,
+    },
+    photoActionButton: {
+      flex: 1,
+      backgroundColor: "#E8F2EF",
+      borderRadius: 7,
+      paddingVertical: 6,
+      alignItems: "center",
+    },
+    photoActionText: {
+      color: "#245C4D",
+      fontSize: 10,
+      fontWeight: "700",
     },
     coordinates: {
       fontSize: 13,

@@ -12,6 +12,8 @@ type MarkerData = {
   status: string;
   latitude: number;
   longitude: number;
+  imageUrl?: string | null;
+  imageUpdatedAt?: string | null;
 };
 
 type ApiMarkerData = Omit<MarkerData, "latitude" | "longitude"> & {
