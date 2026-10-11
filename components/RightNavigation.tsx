@@ -10,7 +10,7 @@ import { useAuth } from "../app/authentication/auth";
 import { useRouter } from "expo-router";
 
 const RightNavigation = () => {
-  const { authState, onLogout } = useAuth();
+  const { authState, onLogout, user } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -24,10 +24,6 @@ const RightNavigation = () => {
 
   const handleLogin = () => {
     router.push("/login");
-  };
-
-  const handleRegister = () => {
-    router.push("/signup");
   };
 
   const handleContactUs = () => {
@@ -67,13 +63,15 @@ const RightNavigation = () => {
       {authState?.authenticated && authState?.isAnonymous ? (
         <TouchableOpacity
           style={styles.navButton}
-          onPress={handleRegister}
+          onPress={handleLogin}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Login"
         >
           <MaterialCommunityIcons
-            name="account-plus"
+            name="login"
             size={24}
-            color="#007BFF"
+            color="#4CAF50"
           />
         </TouchableOpacity>
       ) : authState?.authenticated ? (
@@ -98,6 +96,22 @@ const RightNavigation = () => {
             name="login"
             size={24}
             color="#4CAF50"
+          />
+        </TouchableOpacity>
+      )}
+
+      {user?.isAdmin && (
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => router.push("/admin")}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Admin dashboard"
+        >
+          <MaterialCommunityIcons
+            name="shield-check"
+            size={24}
+            color="#626F47"
           />
         </TouchableOpacity>
       )}

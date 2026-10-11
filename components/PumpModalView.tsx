@@ -7,6 +7,7 @@ import {
   Image,
   ActivityIndicator,
   Platform,
+  Modal,
 } from "react-native";
 import React, { useState } from "react";
 import * as Linking from "expo-linking";
@@ -40,6 +41,7 @@ const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
   const { fetchMarkers } = useMarkers();
   const [votingLoading, setVotingLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
+  const [photoViewerVisible, setPhotoViewerVisible] = useState(false);
   const canUploadImage = Boolean(
     authState?.authenticated && !authState?.isAnonymous
   );
@@ -132,49 +134,33 @@ const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
 
     setImageLoading(true);
     try {
-      const formData = new FormData();
-      const fileName = asset.fileName || "pump-photo.jpg";
-      const fileType = asset.mimeType || "image/jpeg";
-
-      if (Platform.OS === "web" && asset.file) {
-        formData.append("image", asset.file, fileName);
-      } else if (Platform.OS === "web") {
-        const imageResponse = await fetch(asset.uri);
-        const imageBlob = await imageResponse.blob();
-        formData.append("image", imageBlob, fileName);
-      } else {
-        formData.append(
-          "image",
-          { uri: asset.uri, name: fileName, type: fileType } as unknown as Blob
-        );
+      const fileType = asset.mimeType?.toLowerCase() || "image/jpeg";
+      if (!["image/jpeg", "image/png", "image/webp"].includes(fileType)) {
+        throw new Error("Choose a JPEG, PNG, or WebP image.");
       }
 
+      const imageResponse = await fetch(asset.uri);
+      if (!imageResponse.ok) {
+        throw new Error("Could not read the selected image.");
+      }
+      const imageBlob = await imageResponse.blob();
+
       const response = await axios.post(
-        buildApiUrl(`/markers/${encodeURIComponent(pump._id)}/image`),
-        formData,
+        buildApiUrl(`/markers/${encodeURIComponent(pump._id)}/image-submissions`),
+        imageBlob,
         {
           headers: {
             Authorization: `Bearer ${authState.token}`,
-            "Content-Type": "multipart/form-data",
+            "Content-Type": fileType,
           },
+          transformRequest: [(data) => data],
         }
       );
 
-      const savedPump = response.data?.marker ?? response.data?.pump ?? response.data;
-      const imageUrl =
-        savedPump?.imageUrl ?? savedPump?.image?.url ?? response.data?.imageUrl;
-      const imageUpdatedAt =
-        savedPump?.imageUpdatedAt ??
-        savedPump?.image?.updatedAt ??
-        response.data?.imageUpdatedAt ??
-        new Date().toISOString();
-
-      if (!imageUrl) {
-        throw new Error("The server did not return the uploaded image URL.");
-      }
-
-      onSelectMarker({ ...pump, ...savedPump, imageUrl, imageUpdatedAt });
-      await fetchMarkers();
+      Alert.alert(
+        "Photo submitted",
+        response.data?.message || "Your photo is waiting for admin approval."
+      );
     } catch (error: any) {
       const message =
         error.response?.data?.error || error.message || "Please try again.";
@@ -291,10 +277,30 @@ const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
         </View>
 
         <View style={styles.photoColumn}>
-          <View style={styles.photoFrame}>
+          <TouchableOpacity
+            style={styles.photoFrame}
+            onPress={() =>
+              pump.imageUrl
+                ? setPhotoViewerVisible(true)
+                : choosePumpImage("camera")
+            }
+            disabled={imageLoading}
+            accessibilityRole="button"
+            accessibilityLabel={
+              canUploadImage
+                ? pump.imageUrl
+                  ? "View pump photo"
+                  : "Take pump photo"
+                : "Pump photo"
+            }
+          >
             {pump.imageUrl ? (
               <Image
-                source={{ uri: pump.imageUrl }}
+                source={{
+                  uri: /^https?:\/\//i.test(pump.imageUrl)
+                    ? pump.imageUrl
+                    : buildApiUrl(pump.imageUrl),
+                }}
                 style={styles.pumpImage}
                 resizeMode="cover"
                 accessibilityLabel={`${pump.name} photo`}
@@ -302,7 +308,9 @@ const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
             ) : (
               <View style={styles.emptyPhoto}>
                 <Text style={styles.emptyPhotoIcon}>▧</Text>
-                <Text style={styles.emptyPhotoText}>Pump photo</Text>
+                <Text style={styles.emptyPhotoText}>
+                  {canUploadImage ? "Tap to add photo" : "Pump photo"}
+                </Text>
               </View>
             )}
             {imageLoading && (
@@ -310,7 +318,7 @@ const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
                 <ActivityIndicator color="#FFFFFF" />
               </View>
             )}
-          </View>
+          </TouchableOpacity>
           <Text style={styles.imageDate} numberOfLines={1}>
             {imageDateLabel}
           </Text>
@@ -318,19 +326,11 @@ const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
             <View style={styles.photoActions}>
               <TouchableOpacity
                 style={styles.photoActionButton}
-                onPress={() => choosePumpImage("library")}
-                disabled={imageLoading}
-                accessibilityLabel="Choose photo from library"
-              >
-                <Text style={styles.photoActionText}>Gallery</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.photoActionButton}
                 onPress={() => choosePumpImage("camera")}
                 disabled={imageLoading}
-                accessibilityLabel="Take pump photo"
+                accessibilityLabel="Take an updated pump photo for review"
               >
-                <Text style={styles.photoActionText}>Camera</Text>
+                <Text style={styles.photoActionText}>Update</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -383,6 +383,38 @@ const PumpModalView = ({ pump, onSelectMarker }: PumpModalViewProps) => {
       >
         <Text style={styles.mapsButtonText}>🗺️ Open in Maps</Text>
       </TouchableOpacity>
+
+      <Modal
+        visible={photoViewerVisible}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setPhotoViewerVisible(false)}
+      >
+        <View style={styles.photoViewer}>
+          <TouchableOpacity
+            style={styles.photoViewerClose}
+            onPress={() => setPhotoViewerVisible(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close photo"
+          >
+            <Text style={styles.photoViewerCloseText}>✕</Text>
+          </TouchableOpacity>
+          {pump.imageUrl && (
+            <Image
+              source={{
+                uri: /^https?:\/\//i.test(pump.imageUrl)
+                  ? pump.imageUrl
+                  : buildApiUrl(pump.imageUrl),
+              }}
+              style={styles.photoViewerImage}
+              resizeMode="contain"
+              accessibilityLabel={`${pump.name} photo enlarged`}
+            />
+          )}
+          <Text style={styles.photoViewerCaption}>{pump.name}</Text>
+        </View>
+      </Modal>
     </View>
   );
   };
@@ -487,6 +519,42 @@ function createStyles(status: string) {
     photoColumn: {
       width: 132,
     },
+    photoViewer: {
+      flex: 1,
+      backgroundColor: "rgba(14, 18, 16, 0.96)",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 54,
+    },
+    photoViewerImage: {
+      width: "100%",
+      height: "100%",
+    },
+    photoViewerClose: {
+      position: "absolute",
+      top: 48,
+      right: 20,
+      zIndex: 1,
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: "rgba(255, 255, 255, 0.16)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    photoViewerCloseText: {
+      color: "#FFFFFF",
+      fontSize: 19,
+      fontWeight: "700",
+    },
+    photoViewerCaption: {
+      position: "absolute",
+      bottom: 22,
+      color: "#FFFFFF",
+      fontSize: 14,
+      fontWeight: "600",
+    },
     photoFrame: {
       height: 94,
       borderRadius: 12,
@@ -525,8 +593,6 @@ function createStyles(status: string) {
       textAlign: "center",
     },
     photoActions: {
-      flexDirection: "row",
-      gap: 5,
       marginTop: 5,
     },
     photoActionButton: {

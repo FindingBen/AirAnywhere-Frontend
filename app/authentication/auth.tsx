@@ -9,7 +9,12 @@ import {
 
 interface Authprops {
   authState?: { token: string | null; authenticated: boolean | null; isAnonymous?: boolean };
-  user?: { userId: string; username: string; isAnonymous: boolean } | null;
+  user?: {
+    userId: string;
+    username: string;
+    isAnonymous: boolean;
+    isAdmin?: boolean;
+  } | null;
   onRegister?: (email: string, password: string, username: string) => Promise<any>;
   onLogin?: (email: string, password: string) => Promise<any>;
   onLogout?: () => Promise<any>;
@@ -35,7 +40,12 @@ export const AuthProvide = ({ children }: any) => {
     isAnonymous: false,
   });
 
-  const [user, setUser] = useState<{ userId: string; username: string; isAnonymous: boolean } | null>(null);
+  const [user, setUser] = useState<{
+    userId: string;
+    username: string;
+    isAnonymous: boolean;
+    isAdmin?: boolean;
+  } | null>(null);
 
   console.log("[AUTH] Initial render - authState:", authState);
 
@@ -65,6 +75,7 @@ export const AuthProvide = ({ children }: any) => {
               userId: userResponse.data.userId,
               username: userResponse.data.username,
               isAnonymous: userResponse.data.isAnonymous || false,
+              isAdmin: userResponse.data.isAdmin === true,
             });
             setAuthState({
               token: token,
@@ -105,6 +116,7 @@ export const AuthProvide = ({ children }: any) => {
                 userId: userId,
                 username: username,
                 isAnonymous: isAnonymous,
+                isAdmin: false,
               });
               
               setAuthState({
@@ -120,6 +132,7 @@ export const AuthProvide = ({ children }: any) => {
                 userId: fallbackUser,
                 username: fallbackUser,
                 isAnonymous: true,
+                isAdmin: false,
               });
               setAuthState({
                 token: null,
@@ -163,6 +176,7 @@ export const AuthProvide = ({ children }: any) => {
             userId: userId,
             username: username,
             isAnonymous: isAnonymous,
+            isAdmin: false,
           });
           
           setAuthState({
@@ -183,6 +197,7 @@ export const AuthProvide = ({ children }: any) => {
             userId: username,
             username: username,
             isAnonymous: true,
+            isAdmin: false,
           });
           
           setAuthState({
@@ -207,6 +222,7 @@ export const AuthProvide = ({ children }: any) => {
           userId: fallbackUser,
           username: fallbackUser,
           isAnonymous: true,
+          isAdmin: false,
         });
       }
       console.log("[AUTH] ✅ Initialization complete");
@@ -245,7 +261,7 @@ export const AuthProvide = ({ children }: any) => {
         password,
       });
       
-      const { token, userId, username, isAnonymous } = response.data;
+      const { token, userId, username, isAnonymous, isAdmin } = response.data;
       
       setAuthState({
         token: token,
@@ -257,6 +273,7 @@ export const AuthProvide = ({ children }: any) => {
         userId: userId,
         username: username,
         isAnonymous: isAnonymous,
+        isAdmin: isAdmin === true,
       });
 
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;

@@ -40,7 +40,7 @@ const login = () => {
     setLoading(false);
   };
 
-  const handleCreateAccount = () => {
+  const handleRegister = () => {
     router.push("/signup");
   };
 
@@ -103,14 +103,17 @@ const login = () => {
                   </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={handleCreateAccount}
-                  style={[styles.button, styles.registerButton]}
-                >
-                  <Text style={styles.registerButtonText}>
-                    Create Account
+                <View style={styles.registerPrompt}>
+                  <Text style={styles.registerPromptText}>
+                    Don't have an account?
                   </Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleRegister}
+                    accessibilityRole="link"
+                  >
+                    <Text style={styles.registerLink}>Register for free</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </LinearGradient>
@@ -182,18 +185,25 @@ const styles = StyleSheet.create({
   loginButton: {
     backgroundColor: "#626F47",
   },
-  registerButton: {
-    backgroundColor: "transparent",
-    borderWidth: 2,
-    borderColor: "#626F47",
-  },
   buttonText: {
     fontSize: 16,
     fontWeight: "700",
     color: "#FEFAE0",
   },
-  registerButtonText: {
-    fontSize: 16,
+  registerPrompt: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+  },
+  registerPromptText: {
+    fontSize: 14,
+    color: "#424A32",
+  },
+  registerLink: {
+    fontSize: 14,
     fontWeight: "700",
     color: "#626F47",
   },

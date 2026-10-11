@@ -39,6 +39,10 @@ function RootLayoutNav() {
           name="leaderboard"
           options={{ headerShown: false, title: "Leaderboard" }}
         />
+        <Stack.Screen
+          name="admin"
+          options={{ headerShown: false, title: "Admin Dashboard" }}
+        />
       </Stack>
     </ThemeProvider>
   );

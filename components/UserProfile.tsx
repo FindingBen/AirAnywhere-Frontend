@@ -10,7 +10,7 @@ import { useAuth } from "../app/authentication/auth";
 import { useRouter } from "expo-router";
 
 const UserProfile = () => {
-  const { user } = useAuth();
+  const { authState, user } = useAuth();
   const router = useRouter();
   const [showFeedbackNotification, setShowFeedbackNotification] = useState(false);
 
@@ -65,8 +65,18 @@ const UserProfile = () => {
     <>
       <TouchableOpacity
         style={styles.container}
-        onPress={() => setShowFeedbackNotification(true)}
+        onPress={() => {
+          if (!authState?.authenticated || user.isAnonymous) {
+            router.push("/login");
+            return;
+          }
+          setShowFeedbackNotification(true);
+        }}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={
+          user.isAnonymous ? "Login to your account" : "Open profile"
+        }
       >
         <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
           <Text style={styles.initials}>{initials}</Text>
